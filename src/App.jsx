@@ -1,78 +1,81 @@
-import React, { useEffect, useState } from 'react'
+import React from 'react'
+
+import './App.css'
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import Time from './admin/Time';
+import Navbar from './admin/Navbar';
+
+import Sidebar from './admin/Sidebar';
+
+import User from './admin/user';
+
+import Home from './admin/pages/Home';
+
+import Dashboard from './admin/pages/Dashboard';
+
+import CreateCampaigns from './admin/pages/Create';
+
+import CreateContestant from './admin/pages/CreateContestant';
+
+import View from './admin/pages/View';
+
+import Statistics from './admin/pages/Statistics';
+
+import NotFound from './admin/pages/NotFound';
+
+
+
+
+
+// import Section from './admin/Section';
 
 const App = () => {
-
-  const [img, setImg] = useState(()=>{
-    const picture = localStorage.getItem('pic');
-    return picture ? JSON.parse(picture) : null
-  });
-
-
-  useEffect(()=>{
-    localStorage.setItem('pic', JSON.stringify(img))
-  },[img])
-  const handleImage = (e) =>{
-    const image = e.target.files[0];
-    if(image){
-      const pic = URL.createObjectURL(image);
-      setImg(pic)
-    }
-  }
-
-  
   return (
-    <div>
-      <h2 className='text-7xl text-center text-amber-600 font-extrabold'>HELLO WORLD</h2>
+    <div  id="container" className=''> 
 
-      <input className={img && 'hidden'} type="file" accept='image/*' onChange={(e)=>handleImage(e)}/>
-
-      {
-        img && <img src={img} alt='khan'/>
-      }
-
-
+    <div id="navbar" className=''>
+      <div className='flex justify-between items-center'>
+      <Navbar/>
+      <Time />
+      <User />
+      </div>
     </div>
+
+
+          <Router>
+    <div id="sidebar" className='md:overflow-y-scroll'>
+      
+
+    
+      <div>
+        <Sidebar />
+      </div>
+    </div>
+
+    <div id="main" className='md:overflow-y-scroll'>
+      <div>
+        <Routes>
+          <Route path='/' exact element={<Home/>}/>
+          <Route path='/dashboard' element={<Dashboard/>}/>
+          <Route path='/createCampaign' element={<CreateCampaigns/>}/>
+          <Route path='/createContestants' element={<CreateContestant/>}/>
+          <Route path='/viewCampaigns' element={<View/>}/>
+          <Route path='/statistics' element={<Statistics/>}/>
+          <Route path='*' element={<NotFound/>}/>
+        </Routes>
+      </div>
+    
+    </div>
+    </Router>
+
+    
+
+    <footer id="footer">
+      yo footer
+    </footer>
+    </div>
+    
   )
 }
 
 export default App
-
-
-
-
-
-// import { useState } from 'react'
-// import reactLogo from './assets/react.svg'
-// import viteLogo from '/vite.svg'
-// import './App.css'
-
-// function App() {
-//   const [count, setCount] = useState(0)
-
-//   return (
-//     <>
-//       <div>
-//         <a href="https://vite.dev" target="_blank">
-//           <img src={viteLogo} className="logo" alt="Vite logo" />
-//         </a>
-//         <a href="https://react.dev" target="_blank">
-//           <img src={reactLogo} className="logo react" alt="React logo" />
-//         </a>
-//       </div>
-//       <h1>Vite + React</h1>
-//       <div className="card">
-//         <button onClick={() => setCount((count) => count + 1)}>
-//           count is {count}
-//         </button>
-//         <p>
-//           Edit <code>src/App.jsx</code> and save to test HMR
-//         </p>
-//       </div>
-//       <p className="read-the-docs">
-//         Click on the Vite and React logos to learn more
-//       </p>
-//     </>
-//   )
-// }
-
-// export default App
