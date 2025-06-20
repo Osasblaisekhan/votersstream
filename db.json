@@ -1,0 +1,25 @@
+{
+  "users": [
+    {
+      "id": 1,
+      "name": "Alice Johnson",
+      "email": "alice@example.com",
+      "votes": 5,
+      "active": true
+    },
+    {
+      "id": 2,
+      "name": "Bob Smith",
+      "email": "bob@example.com",
+      "votes": 3,
+      "active": true
+    }
+  ],
+
+  "campaign":[
+    {
+        "id":1,
+        "name":"osase"
+    }
+  ]
+}
