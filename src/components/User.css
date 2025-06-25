@@ -1,0 +1,47 @@
+:root{
+    --main-radius:5px;
+    --main-padding:5px;
+}
+
+#container-two{
+    display: grid;
+    position: fixed;
+    width: 100%;
+    height: 100vh;
+    grid-template-columns: repeat(4, 1fr);
+    grid-template-rows: .6fr 4fr 4fr 2fr;
+
+    grid-template-areas: 
+    "nav nav nav nav"
+    "main main main main"
+    "main main main main"
+    "footer footer footer footer"
+    ;
+    grid-gap: 0.2em;
+}
+
+#nav-bar-user{
+    display: grid;
+    grid-area: nav;
+    padding: 10px;
+    background-color: #111827;
+}
+
+#main-user{
+    display: grid;
+    grid-area: main;
+    background-color: burlywood;
+    overflow-x: auto;
+    padding: var(--main-padding);
+    border-radius: var(--main-radius);
+
+}
+
+#footer-user{
+
+     display: grid;
+    
+    grid-area: footer;
+    padding: 10px;
+    background-color: #111827;
+}

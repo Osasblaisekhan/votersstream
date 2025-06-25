@@ -1,6 +1,10 @@
 import React, { useEffect, useState } from 'react'
 
+import { useToggle } from '../../Mobile/MobilePages/ToggleContext';
+
 const Time = () => {
+
+  const {isToggle} = useToggle();
 
     const [time, setTime] = useState('');
 
@@ -25,8 +29,8 @@ const Time = () => {
         })
     },[])
   return (
-    <div className='hidden md:block'>
-      <h3 className='text-white font-bold'>{time}</h3>
+    <div className={isToggle ? 'hidden' : 'block'}>
+      <h3 className='text-white font-bold text-[12px] md:text-[20px]'>{time}</h3>
     </div>
   )
 }

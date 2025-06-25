@@ -6,6 +6,8 @@
 #container{
     display: grid;
     width: 100svw;
+    position: fixed;
+    overflow: hidden;
     height: 100vh;
     grid-template-columns: .8fr repeat(3, 1fr);
     grid-template-rows: .6fr 2fr 4fr 2fr;
@@ -29,7 +31,10 @@
 
 #main{
     display: grid;
+    /* justify-content: center;
+    align-items: center; */
     grid-area: main;
+    
     background-color: burlywood;
      border-radius: var(--main-radius);
     padding: var(--main-padding);
@@ -76,7 +81,7 @@
 }
 
 
-@media only screen and (max-width: 550px){
+@media only screen and (max-width: 626px){
     #container{
         display: grid;
         height: 100svh;

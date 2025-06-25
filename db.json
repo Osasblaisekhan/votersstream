@@ -1,25 +1,52 @@
 {
   "users": [
     {
-      "id": 1,
-      "name": "Alice Johnson",
-      "email": "alice@example.com",
-      "votes": 5,
-      "active": true
+      "id": "63f6e331-658b-40a8-ae4e-6b77f8221739",
+      "name": "osaskhanblise",
+      "email": "blaisekhan204@gmail.com",
+      "vote": 0,
+      "active": false
     },
     {
-      "id": 2,
-      "name": "Bob Smith",
-      "email": "bob@example.com",
-      "votes": 3,
-      "active": true
+      "id": "c32b1f13-a018-4f97-8b69-454562e09d77",
+      "name": "anyam",
+      "email": "blaisekhan204@gmail.com",
+      "vote": 0,
+      "active": false
+    },
+    {
+      "id": "96940b69-13a6-4593-8130-560b0c0a0e0b",
+      "name": "osaskhan",
+      "email": "blaisekhan204@gmail.com",
+      "vote": 0,
+      "active": false
+    },
+    {
+      "id": "d3e40a6d-ca34-436e-b5d8-bceff7f903fd",
+      "name": "Ubuntu lady",
+      "email": "muirelle@gmail.com",
+      "vote": 0,
+      "active": false
+    },
+    {
+      "id": "c7c589df-0aea-4cf3-9f7a-9ccadc5d6fe6",
+      "name": "osaskhan",
+      "email": "blaisekhan204@gmail.com",
+      "vote": 0,
+      "active": false
+    },
+    {
+      "id": "41b51373-3734-4c15-9cca-630156812e2e",
+      "name": "anyam",
+      "email": "blaisekhan204@gmail.com",
+      "vote": 0,
+      "active": false
     }
   ],
-
-  "campaign":[
+  "campaign": [
     {
-        "id":1,
-        "name":"osase"
+      "id": "1",
+      "name": "osase"
     }
   ]
 }
