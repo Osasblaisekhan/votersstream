@@ -8,6 +8,7 @@ const App = () => {
     return (
         <Router>
             <Routes>
+                <Route path="/*" element={<AdminPages />} />
                 <Route path="/admin/*" element={<AdminPages />} />
                 <Route path="/customers/*" element={<UserPages />} />
                 <Route path="/user/*" element={<UserPages />} />

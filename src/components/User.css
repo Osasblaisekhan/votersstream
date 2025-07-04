@@ -1,4 +1,4 @@
-:root{
+ :root{
     --main-radius:5px;
     --main-padding:5px;
 }
@@ -44,4 +44,214 @@
     grid-area: footer;
     padding: 10px;
     background-color: #111827;
+}
+
+.candidates img{
+    display: flex;
+    width: 100px;
+}
+
+.vote img{
+    width: 100px;
+}
+img{
+    display: flex;
+    flex-direction: row;
+}
+
+/* src/components/ConfirmationPopup.css */
+.popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.7); 
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.popup-content {
+  background: #ffffff; 
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  text-align: center;
+  width: 300px;
+}
+
+h3 {
+  color: #4CAF50; 
+}
+
+p {
+  color: #333; 
+}
+
+/* button {
+  background-color: #4CAF50; 
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+button:hover {
+  background-color: #45a049; 
+} */
+
+.candidates {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background-color: #f5f5f5; 
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.candidate-container {
+  display: flex;
+  justify-content: space-around;
+  width: 100%;
+  flex-wrap: wrap; 
+}/* Allow wrapping for smaller screens */
+
+.candidate-card {
+  text-align: center;
+  margin: 20px;
+  background-color: #ffffff; 
+  border-radius: 8px;
+  padding: 15px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+  transition: transform 0.3s ease;
+}
+
+.candidate-card:hover {
+  transform: scale(1.05); 
+}
+
+.candidate-image {
+  width: 150px;
+  height: auto;
+  border-radius: 50%; /* Circular images */
+  border: 2px solid #007BFF; 
+}
+
+.candidate-name {
+  color: #007BFF; 
+}
+
+.candidate-party {
+  color: #555;
+}
+
+.vote-button {
+  background-color: #28a745; 
+  color: white; 
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.vote-button:hover {
+  background-color: #218838;  
+}
+
+/* src/App.css */
+.app {
+  font-family: 'Arial', sans-serif;
+  background-color: #f0f4f8; 
+  color: #333; 
+  text-align: center;
+  padding: 20px;
+  margin: 0;
+}
+
+h1 {
+  color: #2c3e50; 
+  margin-bottom: 20px;
+}
+
+h2 {
+  color: #2980b9; 
+}
+
+.flag {
+  width: 150px; 
+  height: auto;
+  margin: 20px 0; 
+  border-radius: 10px; 
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); 
+}
+
+header {
+  background-color: #34495e; 
+  color: white; 
+  padding: 15px;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+
+
+/* src/components/Header.css */
+.header {
+  background-color: #2c3e50; 
+  color: white; 
+  padding: 15px 20px; 
+  display: flex; 
+  flex-direction: column; 
+  align-items: center; 
+}
+
+.header h1 {
+  margin: 0; 
+  font-size: 24px; 
+}
+
+.nav-links {
+  display: flex; 
+  gap: 15px; 
+  margin-top: 10px; 
+}
+
+.nav-links a {
+  color: white; 
+  text-decoration: none; 
+  padding: 10px 15px; 
+  border-radius: 5px; 
+  transition: background-color 0.3s, color 0.3s; 
+}
+
+.nav-links a:hover {
+  background-color: #2980b9; 
+  color: #fff; 
+} 
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000; /* Ensure it is above other content */
+}
+
+.modal-content {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  text-align: center;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
 }
