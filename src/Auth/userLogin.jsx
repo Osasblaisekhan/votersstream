@@ -16,6 +16,12 @@ const UserLogin = () => {
     // Get stored users from localStorage
     const storedUsers = localStorage.getItem('users');
     const users = storedUsers ? JSON.parse(storedUsers) : [];
+
+    // Check if users exist and if email and password match
+    if (users.length === 0) {
+      setError('No users found. Please sign up first.');
+      return;
+    }
     
     // Find user with matching email and password
     const user = users.find(u => u.email === email && u.password === password);
@@ -24,7 +30,7 @@ const UserLogin = () => {
       login(user);
       navigate('/user');
     } else {
-      setError('Invalid email or password');
+      setError('Invalid email or password try again');
     }
   };
 

@@ -22,7 +22,7 @@ const AdminLogin = () => {
       login({ email, role: 'admin' });
       navigate('/admin');
     } else {
-      setError('Invalid email or password');
+      setError('Invalid email or password try aga');
     }
   };
 

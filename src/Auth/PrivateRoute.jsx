@@ -13,7 +13,6 @@ const PrivateRoute = ({ children, requiredRole }) => {
   if (requiredRole && user.role !== requiredRole) {
     return <Navigate to="/" replace />;
   }
-
   return children;
 };
 
