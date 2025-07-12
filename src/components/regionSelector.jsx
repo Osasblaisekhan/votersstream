@@ -1,24 +1,3 @@
-// // src/components/RegionSelector.js
-// import React from 'react';
-
-// const RegionSelector = ({ regions, onSelect }) => {
-//   return (
-//     <div className='region-selector'>
-//       <h2>Select Your Region</h2>
-//       <select onChange={(e) => onSelect(regions[e.target.value])}>
-//         <option value="">--Select a Region--</option>
-//         {regions.map((region, index) => (
-//           <option key={region.id} value={index}>
-//             {region.name}
-//           </option>
-//         ))}
-//       </select>
-//     </div>
-//   );
-// };
-
-// export default RegionSelector;
-
 const RegionSelector = ({ regions, onSelect }) => {
   return (
     <select onChange={(e) => {

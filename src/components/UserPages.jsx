@@ -58,8 +58,7 @@ const UserPages = () => {
         </div>
         <div id="main-user">
           <div className="app">
-            <h1>2025 Cameroonian Presidential Elections</h1>
-            <img src={flag} alt="loading..." />
+         
             <Header />
             <h2>Welcome to the Voting Portal</h2>
             <Routes>
@@ -68,6 +67,9 @@ const UserPages = () => {
               {/* Default route for UserPages, if needed */}
               <Route path="/" element={<h2>Please select an option.</h2>} />
             </Routes>
+
+               <h1>2025 Cameroonian Presidential Elections</h1>
+            <img src={flag} alt="loading..." />
           </div>
         </div>
         <div id="footer-user">
