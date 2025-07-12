@@ -15,7 +15,7 @@ const CandidateList = ({ candidates, onVote, disabled }) => {
               onClick={() => onVote(candidate)}
               disabled={disabled} // ✅ this disables button after vote
             >
-              Vote
+               cast Vote
             </button>
           </div>
         ))}
