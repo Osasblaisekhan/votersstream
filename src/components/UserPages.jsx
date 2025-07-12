@@ -49,8 +49,18 @@ import Header from './nav';
 import Vote from './vote';
 import Results from './results'; 
 
+import { useNavigate } from 'react-router-dom';
+
 const UserPages = () => {
+
+    const navigtate = useNavigate();
+    const Homepage = ()=>{
+      navigtate('/user/vote')
+    };
+
   return (
+  
+
     <div>
       <div id="container-two">
         <div id="nav-bar-user">
@@ -66,7 +76,7 @@ const UserPages = () => {
               <Route path="/vote" element={<Vote />} />
               <Route path="/results" element={<Results />} /> 
               {/* Default route for UserPages, if needed */}
-              <Route path="/" element={<h2>Please select an option.</h2>} />
+              <Route path="/" element={<h2 onClick={()=> Homepage()} className='cursor-pointer'>Please click select an option.</h2>} />
             </Routes>
           </div>
         </div>
