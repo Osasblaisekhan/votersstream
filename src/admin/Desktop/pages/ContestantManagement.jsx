@@ -1,20 +1,19 @@
 import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import LoadingSpinners from './loading';
 import { getStoredData, setStoredData, cameroonRegions } from '../../../utils/mockData';
 import { FiPlus, FiEdit2, FiTrash2, FiUser, FiMapPin } from 'react-icons/fi';
-import Modal from '../../../components/Modal';
+import Modal from '../../../components/modal';
 
 const ContestantManagement = () => {
   const [contestants, setContestants] = useState([]);
+  const [isLoading, setIsLoading] = useState(true)
+ contestants.map((yoo)=>console.log(yoo));
   const [campaigns, setCampaigns] = useState([]);
   const [showForm, setShowForm] = useState(false);
   const [editingContestant, setEditingContestant] = useState(null);
-  const [formData, setFormData] = useState({
-    name: '',
-    profilePicture: '',
-    region: '',
-    campaignId: '',
-    party: ''
-  });
+
+  console.log('khan', editingContestant);
   const [modal, setModal] = useState({
     isOpen: false,
     title: '',
@@ -23,10 +22,28 @@ const ContestantManagement = () => {
     showConfirm: false,
     onConfirm: null
   });
+  const [formData, setFormData] = useState({
+    name: '',
+    party: '',
+    origin: '',
+    campaign: '',
+    picture:''
+  });
 
+  const fetchContestants = async()=>{
+    try{
+    const response = await axios.get('http://localhost:5001/contestants');
+    setContestants(response.data)
+    }catch(error){
+      throw new Error('unable to fetch contestants', error)
+    }finally{
+      setIsLoading(false);
+    }
+  }
   useEffect(() => {
-    setContestants(getStoredData('contestants', []));
+    // setContestants(getStoredData('contestants', []));
     setCampaigns(getStoredData('campaigns', []));
+    fetchContestants();
   }, []);
 
   const showModal = (title, message, type = 'info', showConfirm = false, onConfirm = null) => {
@@ -51,37 +68,37 @@ const ContestantManagement = () => {
     });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    
     const newContestant = {
-      id: editingContestant ? editingContestant.id : Date.now(),
       ...formData,
-      campaignId: parseInt(formData.campaignId),
+      campaignId: parseInt(formData.campaign),
       votes: editingContestant ? editingContestant.votes : 0,
-      createdAt: editingContestant ? editingContestant.createdAt : new Date().toISOString()
     };
 
-    let updatedContestants;
-    if (editingContestant) {
-      updatedContestants = contestants.map(c => c.id === editingContestant.id ? newContestant : c);
-      showModal(
-        'Contestant Updated',
-        `${newContestant.name} has been updated successfully.`,
-        'success'
-      );
-    } else {
-      updatedContestants = [...contestants, newContestant];
-      showModal(
-        'Contestant Added',
-        `${newContestant.name} has been added successfully.`,
-        'success'
-      );
+    try {
+      if (editingContestant) {
+        // Update existing contestant in DB
+        await axios.put(`http://localhost:5001/contestants/${editingContestant._id}`, newContestant);
+        showModal(
+          'Contestant Updated',
+          `${newContestant.name} has been updated successfully.`,
+          'success'
+        );
+      } else {
+        // Add new contestant to DB
+        await axios.post('http://localhost:5001/contestants', newContestant);
+        showModal(
+          'Contestant Added',
+          `${newContestant.name} has been added successfully.`,
+          'success'
+        );
+      }
+      fetchContestants(); // Refresh list from DB
+      resetForm();
+    } catch (error) {
+      showModal('Error', 'Failed to save contestant. Please try again.', 'error');
     }
-
-    setContestants(updatedContestants);
-    setStoredData('contestants', updatedContestants);
-    resetForm();
   };
 
   const resetForm = () => {
@@ -100,9 +117,9 @@ const ContestantManagement = () => {
     setEditingContestant(contestant);
     setFormData({
       name: contestant.name,
-      profilePicture: contestant.profilePicture,
-      region: contestant.region,
-      campaignId: contestant.campaignId.toString(),
+      picture: contestant.picture,
+      origin: contestant.origin,
+      campaign: contestant.campaign,
       party: contestant.party
     });
     setShowForm(true);
@@ -114,15 +131,18 @@ const ContestantManagement = () => {
       `Are you sure you want to delete ${contestant.name}? This action cannot be undone.`,
       'error',
       true,
-      () => {
-        const updatedContestants = contestants.filter(c => c.id !== contestant.id);
-        setContestants(updatedContestants);
-        setStoredData('contestants', updatedContestants);
-        showModal(
-          'Contestant Deleted',
-          `${contestant.name} has been deleted successfully.`,
-          'success'
-        );
+      async () => {
+        try {
+          await axios.delete(`http://localhost:5001/contestants/${contestant._id}`);
+          showModal(
+            'Contestant Deleted',
+            `${contestant.name} has been deleted successfully.`,
+            'success'
+          );
+          fetchContestants(); // Refresh list from DB
+        } catch (error) {
+          showModal('Error', 'Failed to delete contestant. Please try again.', 'error');
+        }
       }
     );
   };
@@ -189,8 +209,8 @@ const ContestantManagement = () => {
                 </label>
                 <select
                   required
-                  value={formData.region}
-                  onChange={(e) => setFormData({...formData, region: e.target.value})}
+                  value={formData.origin}
+                  onChange={(e) => setFormData({...formData, origin: e.target.value})}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 >
                   <option value="">Select Region</option>
@@ -206,13 +226,13 @@ const ContestantManagement = () => {
                 </label>
                 <select
                   required
-                  value={formData.campaignId}
-                  onChange={(e) => setFormData({...formData, campaignId: e.target.value})}
+                  value={formData.campaign}
+                  onChange={(e) => setFormData({...formData, campaign: e.target.value})}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 >
                   <option value="">Select Campaign</option>
                   {campaigns.map(campaign => (
-                    <option key={campaign.id} value={campaign.id}>{campaign.name}</option>
+                    <option key={campaign.id} value={campaign.name}>{campaign.name}</option>
                   ))}
                 </select>
               </div>
@@ -223,8 +243,8 @@ const ContestantManagement = () => {
                 </label>
                 <input
                   type="text"
-                  value={formData.profilePicture}
-                  onChange={(e) => setFormData({...formData, profilePicture: e.target.value})}
+                  value={formData.picture}
+                  onChange={(e) => setFormData({...formData, picture: e.target.value})}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
                   placeholder="Enter image URL or leave blank for default"
                 />
@@ -250,14 +270,18 @@ const ContestantManagement = () => {
         </div>
       )}
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+         <div>
+          {
+            isLoading ? <div><LoadingSpinners /></div> :
+
+             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {contestants.map((contestant) => (
-          <div key={contestant.id} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+          <div key={contestant._id} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
             <div className="flex items-center space-x-3 mb-3">
               <div className="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center overflow-hidden">
-                {contestant.profilePicture ? (
+                {contestant.picture ? (
                   <img 
-                    src={contestant.profilePicture} 
+                    src={contestant.picture} 
                     alt={contestant.name}
                     className="w-full h-full object-cover"
                   />
@@ -290,13 +314,13 @@ const ContestantManagement = () => {
             <div className="space-y-2 text-sm text-gray-500">
               <div className="flex items-center space-x-1">
                 <FiMapPin size={14} />
-                <span>{contestant.region}</span>
+                <span>{contestant.origin}</span>
               </div>
               <div>
-                <span className="font-medium">Campaign:</span> {getCampaignName(contestant.campaignId)}
+                <span className="font-medium">Campaign:</span> {contestant.campaign}
               </div>
               <div>
-                <span className="font-medium">Votes:</span> {contestant.votes || 0}
+                <span className="font-medium">Votes:</span> {contestant.votes}
               </div>
             </div>
           </div>
@@ -310,6 +334,8 @@ const ContestantManagement = () => {
           </div>
         )}
       </div>
+          }
+         </div>
 
       {/* Modal */}
       <Modal

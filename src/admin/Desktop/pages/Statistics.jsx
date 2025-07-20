@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { getStoredData, cameroonRegions } from '../../../utils/mockData';
+import axios from 'axios';
 import { FiUsers, FiBarChart, FiTrendingUp, FiActivity, FiMapPin, FiCalendar } from 'react-icons/fi';
 import { MdHowToVote } from 'react-icons/md';
 import LoadingSpinners from './loading';
 
 const Statistics = () => {
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [stats, setStats] = useState({
     totalUsers: 0,
     totalCampaigns: 0,
@@ -17,75 +19,107 @@ const Statistics = () => {
   });
 
   useEffect(() => {
-    setTimeout(() => {
-      calculateStatistics();
-      setIsLoading(false);
-    }, 2000);
+    const fetchStats = async () => {
+      setIsLoading(true);
+      setError(null);
+      try {
+        const users = getStoredData('users', []);
+        const [campaignsRes, contestantsRes] = await Promise.all([
+          axios.get('http://localhost:5001/campaigns'),
+          axios.get('http://localhost:5001/contestants'),
+        ]);
+        const campaigns = campaignsRes.data;
+        const contestants = contestantsRes.data;
+
+        const now = new Date();
+        const activeCampaigns = campaigns.filter(c => {
+          const endDate = new Date(c.endDate);
+          return endDate > now;
+        }).length;
+
+        const votedUsers = users.filter(u => u.hasVoted).length;
+        const votingPercentage = users.length > 0 ? ((votedUsers / users.length) * 100).toFixed(1) : 0;
+
+        // Calculate regional statistics
+        const regionalStats = {};
+        cameroonRegions.forEach(region => {
+          let regionVotes = 0;
+          contestants.forEach(contestant => {
+            const votes = parseInt(localStorage.getItem(`votes_region_${region}_candidate_${contestant.id}`)) || 0;
+            regionVotes += votes;
+          });
+          regionalStats[region] = regionVotes;
+        });
+
+        // Calculate total votes
+        const totalVotes = Object.values(regionalStats).reduce((sum, votes) => sum + votes, 0);
+
+        // Calculate campaign statistics
+        const campaignStats = campaigns.map(campaign => {
+          const campaignContestants = contestants.filter(c => c.campaignId === campaign.id);
+          let campaignVotes = 0;
+          campaignContestants.forEach(contestant => {
+            cameroonRegions.forEach(region => {
+              const votes = parseInt(localStorage.getItem(`votes_region_${region}_candidate_${contestant.id}`)) || 0;
+              campaignVotes += votes;
+            });
+          });
+          return {
+            ...campaign,
+            totalVotes: campaignVotes,
+            contestants: campaignContestants.length
+          };
+        });
+
+        setStats({
+          totalUsers: users.length,
+          totalCampaigns: campaigns.length,
+          activeCampaigns,
+          totalVotes,
+          votingPercentage,
+          regionalStats,
+          campaignStats
+        });
+      } catch (err) {
+        setError('Failed to load statistics. Please check your connection or try again later.');
+        setStats({
+          totalUsers: 0,
+          totalCampaigns: 0,
+          activeCampaigns: 0,
+          totalVotes: 0,
+          votingPercentage: 0,
+          regionalStats: {},
+          campaignStats: []
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchStats();
   }, []);
 
-  const calculateStatistics = () => {
-    const users = getStoredData('users', []);
-    const campaigns = getStoredData('campaigns', []);
-    const contestants = getStoredData('contestants', []);
-    
-    const now = new Date();
-    const activeCampaigns = campaigns.filter(c => {
-      const endDate = new Date(c.endDate);
-      return endDate > now;
-    }).length;
-    
-    const votedUsers = users.filter(u => u.hasVoted).length;
-    const votingPercentage = users.length > 0 ? ((votedUsers / users.length) * 100).toFixed(1) : 0;
-    
-    // Calculate regional statistics
-    const regionalStats = {};
-    cameroonRegions.forEach(region => {
-      let regionVotes = 0;
-      contestants.forEach(contestant => {
-        const votes = parseInt(localStorage.getItem(`votes_region_${region}_candidate_${contestant.id}`)) || 0;
-        regionVotes += votes;
-      });
-      regionalStats[region] = regionVotes;
-    });
-    
-    // Calculate total votes
-    const totalVotes = Object.values(regionalStats).reduce((sum, votes) => sum + votes, 0);
-    
-    // Calculate campaign statistics
-    const campaignStats = campaigns.map(campaign => {
-      const campaignContestants = contestants.filter(c => c.campaignId === campaign.id);
-      let campaignVotes = 0;
-      
-      campaignContestants.forEach(contestant => {
-        cameroonRegions.forEach(region => {
-          const votes = parseInt(localStorage.getItem(`votes_region_${region}_candidate_${contestant.id}`)) || 0;
-          campaignVotes += votes;
-        });
-      });
-      
-      return {
-        ...campaign,
-        totalVotes: campaignVotes,
-        contestants: campaignContestants.length
-      };
-    });
-
-    setStats({
-      totalUsers: users.length,
-      totalCampaigns: campaigns.length,
-      activeCampaigns,
-      totalVotes,
-      votingPercentage,
-      regionalStats,
-      campaignStats
-    });
-  };
 
   if (isLoading) {
     return (
       <div className='flex flex-col items-center justify-center min-h-[400px]'>
         <LoadingSpinners />
-        <p className='text-white mt-4 text-lg'>Loading Statistics...</p>
+        <p className='text-gray-700 mt-4 text-lg animate-pulse'>Loading Statistics, please wait...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className='flex flex-col items-center justify-center min-h-[400px]'>
+        <FiBarChart size={48} className='text-red-400 mb-4 animate-bounce' />
+        <p className='text-red-600 text-lg font-semibold mb-2'>Error Loading Statistics</p>
+        <p className='text-gray-500'>{error}</p>
+        <button
+          onClick={() => window.location.reload()}
+          className='mt-6 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-colors'
+        >
+          Retry
+        </button>
       </div>
     );
   }

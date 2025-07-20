@@ -2,6 +2,9 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { FiUsers, FiBarChart, FiShield, FiGlobe } from 'react-icons/fi';
 import { MdHowToVote } from 'react-icons/md';
+import HTMLContent from './animate';
+
+import Time from '../admin/Desktop/Navbars/Time';
 
 const LandingPage = () => {
   return (
@@ -10,16 +13,25 @@ const LandingPage = () => {
       <header className="bg-white shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-6">
-            <div className="flex items-center space-x-3">
+
+            <div className="flex items-center space-x-3 text-white">
               <div className="w-10 h-10 bg-gradient-to-r from-indigo-600 to-purple-600 rounded-lg flex items-center justify-center">
-                <MdHowToVote className="text-white" size={24} />
+                <MdHowToVote size={30} color='white' />
               </div>
-              <h1 className="text-2xl font-bold text-gray-900">Cameroon Voting Portal</h1>
+
+             <div>
+               <h3 className="text-2xl font-bold text-white">Cameroon Voting Portal</h3>
+             </div>
             </div>
+
+            <div>
+              <Time />
+            </div>
+
             <div className="flex space-x-4">
               <Link 
                 to="/admin/login" 
-                className="px-4 py-2 text-indigo-600 hover:text-indigo-800 font-medium transition-colors"
+                className="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-medium"
               >
                 Admin Login
               </Link>
@@ -76,6 +88,7 @@ const LandingPage = () => {
           </div>
           
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+
             <div className="text-center p-6 rounded-xl bg-blue-50 hover:bg-blue-100 transition-colors">
               <div className="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
                 <FiShield className="text-white" size={32} />
@@ -156,7 +169,7 @@ const LandingPage = () => {
               <div className="text-indigo-200">Regions Covered</div>
             </div>
             <div>
-              <div className="text-4xl font-bold mb-2">100%</div>
+              <div className="text-4xl font-bold mb-2 flex items-center"><HTMLContent />%</div>
               <div className="text-indigo-200">Secure Voting</div>
             </div>
             <div>
@@ -174,7 +187,7 @@ const LandingPage = () => {
       {/* Footer */}
       <footer className="bg-gray-900 text-white py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid md:grid-cols-3 gap-8">
+          <div className="grid md:grid-cols-3 gap-8 items-center justify-between">
             <div>
               <div className="flex items-center space-x-3 mb-4">
                 <div className="w-8 h-8 bg-gradient-to-r from-indigo-600 to-purple-600 rounded-lg flex items-center justify-center">
@@ -182,14 +195,14 @@ const LandingPage = () => {
                 </div>
                 <h3 className="text-xl font-bold">Cameroon Voting Portal</h3>
               </div>
-              <p className="text-gray-400">
+              <h3 className="text-white">
                 Empowering democratic participation through secure and transparent voting technology.
-              </p>
+              </h3>
             </div>
             
             <div>
               <h4 className="text-lg font-semibold mb-4">Quick Links</h4>
-              <ul className="space-y-2 text-gray-400">
+              <ul className="space-y-2 text-white">
                 <li><Link to="/user/signup" className="hover:text-white transition-colors">Register to Vote</Link></li>
                 <li><Link to="/user/login" className="hover:text-white transition-colors">Voter Login</Link></li>
                 <li><Link to="/admin/login" className="hover:text-white transition-colors">Admin Access</Link></li>
@@ -198,16 +211,16 @@ const LandingPage = () => {
             
             <div>
               <h4 className="text-lg font-semibold mb-4">Contact</h4>
-              <div className="text-gray-400 space-y-2">
-                <p>Email: info@cameroonvoting.cm</p>
-                <p>Phone: +237 XXX XXX XXX</p>
-                <p>Address: Yaoundé, Cameroon</p>
+              <div className="text-white space-y-2">
+                <h3>Email: info@cameroonvoting.cm</h3>
+                <h3>Phone: +237 XXX XXX XXX</h3>
+                <h3>Address: Yaoundé, Cameroon</h3>
               </div>
             </div>
           </div>
           
-          <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
-            <p>&copy; 2025 Cameroon Voting Portal. All rights reserved.</p>
+          <div className="border-t border-gray-800 mt-8 pt-8 text-center text-white">
+            <h3 className='text-white'>&copy; 2025 Cameroon Voting Portal. All rights reserved.</h3>
           </div>
         </div>
       </footer>

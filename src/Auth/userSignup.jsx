@@ -1,10 +1,13 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from './AuthContext';
+import { FaRegEyeSlash } from "react-icons/fa";
+import { FaRegEye } from "react-icons/fa";
 import { sendVerificationEmail, verifyToken, resendVerificationEmail } from '../utils/emailService';
 
 const Signup = () => {
   const [step, setStep] = useState(1); // 1: email, 2: verification, 3: complete registration
+  const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -14,9 +17,17 @@ const Signup = () => {
   const [verificationToken, setVerificationToken] = useState('');
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const navigate = useNavigate();
   const { login } = useAuth();
 
+  const HandlePassword = ()=>{
+    setShowPassword((prevState)=>!prevState)
+  }
+
+  const HandleConfirmPassword = ()=>{
+    setShowConfirmPassword((prevState)=> !prevState)
+  }
   const handleEmailSubmit = async (e) => {
     e.preventDefault();
     setMessage('');
@@ -213,7 +224,7 @@ const Signup = () => {
                   name="name"
                   type="text"
                   required
-                  className="appearance-none relative block w-full px-4 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+                  className="appearance-none relative block w-full px-4 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:z-10 sm:text-sm"
                   placeholder="Enter your full name"
                   value={formData.name}
                   onChange={(e) => setFormData({...formData, name: e.target.value})}
@@ -223,31 +234,42 @@ const Signup = () => {
                 <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
                   Password
                 </label>
+
+                <div  className="appearance-none flex items-center relative  w-full  border border-gray-300 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm">
                 <input
                   id="password"
                   name="password"
-                  type="password"
+                  type={showPassword ? 'text' : 'password'}
                   required
-                  className="appearance-none relative block w-full px-4 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+                  className="appearance-none relative block w-[95%] px-4 py-3  placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:z-10 sm:text-sm"
                   placeholder="Enter password"
                   value={formData.password}
                   onChange={(e) => setFormData({...formData, password: e.target.value})}
                 />
+               {
+                showPassword ? <FaRegEye color='black' size={20} onClick={()=>HandlePassword()}/> :  <FaRegEyeSlash color='black' size={20} onClick={()=>HandlePassword()}/>
+               }
+                </div>
               </div>
               <div>
                 <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-2">
                   Confirm Password
                 </label>
+            <div  className="appearance-none flex items-center relative  w-full  border border-gray-300 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm">
                 <input
                   id="confirmPassword"
                   name="confirmPassword"
-                  type="password"
+                  type={showConfirmPassword ? 'text' : 'password'}
                   required
-                  className="appearance-none relative block w-full px-4 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+                  className="appearance-none relative block w-[95%] px-4 py-3  placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:z-10 sm:text-sm"
                   placeholder="Confirm password"
                   value={formData.confirmPassword}
                   onChange={(e) => setFormData({...formData, confirmPassword: e.target.value})}
                 />
+               {
+                showConfirmPassword ? <FaRegEye color='black' size={20} onClick={()=>HandleConfirmPassword()}/> :  <FaRegEyeSlash color='black' size={20} onClick={()=>HandleConfirmPassword()}/>
+               }
+                </div>
               </div>
             </div>
             <button

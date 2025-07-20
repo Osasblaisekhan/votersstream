@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import axios from 'axios';
 import { getStoredData } from '../../../utils/mockData';
 import { FiUsers, FiCalendar, FiBarChart, FiTrendingUp, FiActivity, FiAward } from 'react-icons/fi';
 import { MdHowToVote, MdCampaign } from 'react-icons/md';
@@ -6,6 +7,7 @@ import LoadingSpinners from './loading';
 
 const Home = () => {
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [stats, setStats] = useState({
     totalUsers: 0,
     totalCampaigns: 0,
@@ -15,49 +17,63 @@ const Home = () => {
     topCandidate: null
   });
 
+  console.log('yoo stats', stats.totalUsers)
+
   useEffect(() => {
-    setTimeout(() => {
-      setIsLoading(false);
-    }, 2000);
+    const fetchStats = async () => {
+      setIsLoading(true);
+      setError(null);
+      try {
+        const users = getStoredData('users', []);
+        const [campaignsRes, contestantsRes] = await Promise.all([
+          axios.get('http://localhost:5001/campaigns'),
+          axios.get('http://localhost:5001/contestants'),
+        ]);
+        const campaigns = campaignsRes.data;
+        const contestants = contestantsRes.data;
 
-    // Calculate comprehensive statistics
-    const users = getStoredData('users', []);
-    const campaigns = getStoredData('campaigns', []);
-    const contestants = getStoredData('contestants', []);
-    
-    const now = new Date();
-    const activeCampaigns = campaigns.filter(c => {
-      const endDate = new Date(c.endDate);
-      return endDate > now;
-    }).length;
-    
-    const votedUsers = users.filter(u => u.hasVoted).length;
-    const votingPercentage = users.length > 0 ? ((votedUsers / users.length) * 100).toFixed(1) : 0;
-    
-    // Calculate total votes and find top candidate
-    let totalVotes = 0;
-    let candidateVotes = {};
-    
-    contestants.forEach(contestant => {
-      let contestantTotal = 0;
-      for (let i = 1; i <= 10; i++) {
-        const votes = parseInt(localStorage.getItem(`votes_region_${i}_candidate_${contestant.id}`)) || 0;
-        contestantTotal += votes;
-        totalVotes += votes;
+        const now = new Date();
+        const activeCampaigns = campaigns.filter(c => {
+          const endDate = new Date(c.endDate);
+          return endDate > now;
+        }).length;
+
+        const votedUsers = users.filter(u => u.hasVoted).length;
+        const votingPercentage = users.length > 0 ? ((votedUsers / users.length) * 100).toFixed(1) : 0;
+
+        // Calculate total votes and find top candidate
+        let totalVotes = 0;
+        let candidateVotes = {};
+        contestants.forEach(contestant => {
+          const votes = parseInt(contestant.totalVotes || contestant.votes || 0);
+          totalVotes += votes;
+          candidateVotes[contestant._id || contestant.id] = { ...contestant, totalVotes: votes };
+        });
+        const topCandidate = Object.values(candidateVotes).sort((a, b) => b.totalVotes - a.totalVotes)[0];
+
+        setStats({
+          totalUsers: users.length,
+          totalCampaigns: campaigns.length,
+          activeCampaigns,
+          totalVotes,
+          votingPercentage,
+          topCandidate
+        });
+      } catch (err) {
+        setError('Failed to load dashboard data. Please check your connection or try again later.');
+        setStats({
+          totalUsers: 0,
+          totalCampaigns: 0,
+          activeCampaigns: 0,
+          totalVotes: 0,
+          votingPercentage: 0,
+          topCandidate: null
+        });
+      } finally {
+        setIsLoading(false);
       }
-      candidateVotes[contestant.id] = { ...contestant, totalVotes: contestantTotal };
-    });
-    
-    const topCandidate = Object.values(candidateVotes).sort((a, b) => b.totalVotes - a.totalVotes)[0];
-
-    setStats({
-      totalUsers: users.length,
-      totalCampaigns: campaigns.length,
-      activeCampaigns,
-      totalVotes,
-      votingPercentage,
-      topCandidate
-    });
+    };
+    fetchStats();
   }, []);
 
   const dashboardCards = [
@@ -100,7 +116,19 @@ const Home = () => {
       {isLoading ? (
         <div className='flex flex-col items-center justify-center min-h-[400px]'>
           <LoadingSpinners />
-          <p className='text-white mt-4 text-lg'>Loading Dashboard...</p>
+          <p className='text-gray-700 mt-4 text-lg animate-pulse'>Loading Dashboard, please wait...</p>
+        </div>
+      ) : error ? (
+        <div className='flex flex-col items-center justify-center min-h-[400px]'>
+          <FiBarChart size={48} className='text-red-400 mb-4 animate-bounce' />
+          <p className='text-red-600 text-lg font-semibold mb-2'>Error Loading Dashboard</p>
+          <p className='text-gray-500'>{error}</p>
+          <button
+            onClick={() => window.location.reload()}
+            className='mt-6 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-colors'
+          >
+            Retry
+          </button>
         </div>
       ) : (
         <div className='space-y-8'>

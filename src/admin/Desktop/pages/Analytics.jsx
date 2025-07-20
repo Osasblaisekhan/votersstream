@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { getStoredData, cameroonRegions } from '../../../utils/mockData';
+import axios from 'axios';
 import { FiDownload, FiBarChart, FiTrendingUp, FiUsers, FiMapPin, FiCalendar } from 'react-icons/fi';
 import Chart from 'react-apexcharts';
 
@@ -9,11 +10,29 @@ const Analytics = () => {
   const [users, setUsers] = useState([]);
   const [selectedCampaign, setSelectedCampaign] = useState('');
   const [viewType, setViewType] = useState('nationwide');
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    setCampaigns(getStoredData('campaigns', []));
-    setContestants(getStoredData('contestants', []));
-    setUsers(getStoredData('users', []));
+    const fetchData = async () => {
+      setIsLoading(true);
+      setError(null);
+      try {
+        const users = getStoredData('users', []);
+        const [campaignsRes, contestantsRes] = await Promise.all([
+          axios.get('http://localhost:5001/campaigns'),
+          axios.get('http://localhost:5001/contestants'),
+        ]);
+        setCampaigns(campaignsRes.data);
+        setContestants(contestantsRes.data);
+        setUsers(users);
+      } catch (err) {
+        setError('Failed to load analytics data. Please check your connection or try again later.');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchData();
   }, []);
 
   const getVotingData = () => {
@@ -122,6 +141,33 @@ const Analytics = () => {
 
   const { nationwide, regional } = getVotingData();
   const selectedCampaignData = campaigns.find(c => c.id === parseInt(selectedCampaign));
+
+  if (isLoading) {
+    return (
+      <div className='flex flex-col items-center justify-center min-h-[400px]'>
+        <div className='animate-spin mb-4'>
+          <FiBarChart size={48} className='text-indigo-400' />
+        </div>
+        <p className='text-gray-700 mt-4 text-lg animate-pulse'>Loading Analytics, please wait...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className='flex flex-col items-center justify-center min-h-[400px]'>
+        <FiBarChart size={48} className='text-red-400 mb-4 animate-bounce' />
+        <p className='text-red-600 text-lg font-semibold mb-2'>Error Loading Analytics</p>
+        <p className='text-gray-500'>{error}</p>
+        <button
+          onClick={() => window.location.reload()}
+          className='mt-6 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-colors'
+        >
+          Retry
+        </button>
+      </div>
+    );
+  }
 
   // Chart data for nationwide results
   const chartOptions = {

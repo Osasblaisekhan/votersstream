@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { getStoredData, setStoredData } from '../../../utils/mockData';
+import axios from 'axios';
 import { FiPlus, FiEdit2, FiTrash2, FiCalendar, FiUsers, FiClock } from 'react-icons/fi';
-import Modal from '../../../components/Modal';
+import Modal from '../../../components/modal';
 
 const CampaignManagement = () => {
   const [campaigns, setCampaigns] = useState([]);
+
+  console.log('yoo cam', campaigns);
   const [showForm, setShowForm] = useState(false);
   const [editingCampaign, setEditingCampaign] = useState(null);
   const [formData, setFormData] = useState({
@@ -12,7 +14,6 @@ const CampaignManagement = () => {
     description: '',
     startDate: '',
     endDate: '',
-    participants: []
   });
   const [modal, setModal] = useState({
     isOpen: false,
@@ -24,9 +25,17 @@ const CampaignManagement = () => {
   });
 
   useEffect(() => {
-    const allCampaigns = getStoredData('campaigns', []);
-    setCampaigns(allCampaigns);
+    fetchCampaigns();
   }, []);
+
+  const fetchCampaigns = async () => {
+    try {
+      const response = await axios.get('http://localhost:5001/campaigns');
+      setCampaigns(response.data);
+    } catch (error) {
+      showModal('Error', 'Failed to fetch campaigns from server.', 'error');
+    }
+  };
 
   const showModal = (title, message, type = 'info', showConfirm = false, onConfirm = null) => {
     setModal({
@@ -60,13 +69,11 @@ const CampaignManagement = () => {
     return 'active';
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    
     // Validate dates
     const startDate = new Date(formData.startDate);
     const endDate = new Date(formData.endDate);
-    
     if (endDate <= startDate) {
       showModal(
         'Invalid Date Range',
@@ -75,34 +82,34 @@ const CampaignManagement = () => {
       );
       return;
     }
-    
     const newCampaign = {
-      id: editingCampaign ? editingCampaign.id : Date.now(),
       ...formData,
       status: getCampaignStatus({ startDate: formData.startDate, endDate: formData.endDate }),
-      createdAt: editingCampaign ? editingCampaign.createdAt : new Date().toISOString()
+      participants: formData.participants || [],
     };
-
-    let updatedCampaigns;
-    if (editingCampaign) {
-      updatedCampaigns = campaigns.map(c => c.id === editingCampaign.id ? newCampaign : c);
-      showModal(
-        'Campaign Updated',
-        `Campaign "${newCampaign.name}" has been updated successfully.`,
-        'success'
-      );
-    } else {
-      updatedCampaigns = [...campaigns, newCampaign];
-      showModal(
-        'Campaign Created',
-        `Campaign "${newCampaign.name}" has been created successfully.`,
-        'success'
-      );
+    try {
+      if (editingCampaign) {
+        // Update campaign
+        await axios.put(`http://localhost:5001/campaigns/${editingCampaign._id}`, newCampaign);
+        showModal(
+          'Campaign Updated',
+          `Campaign "${newCampaign.name}" has been updated successfully.`,
+          'success'
+        );
+      } else {
+        // Create campaign
+        await axios.post('http://localhost:5001/campaigns', newCampaign);
+        showModal(
+          'Campaign Created',
+          `Campaign "${newCampaign.name}" has been created successfully.`,
+          'success'
+        );
+      }
+      fetchCampaigns();
+      resetForm();
+    } catch (error) {
+      showModal('Error', 'Failed to save campaign. Please try again.', 'error');
     }
-
-    setCampaigns(updatedCampaigns);
-    setStoredData('campaigns', updatedCampaigns);
-    resetForm();
   };
 
   const resetForm = () => {
@@ -135,15 +142,18 @@ const CampaignManagement = () => {
       `Are you sure you want to delete "${campaign.name}"? This action cannot be undone and will remove all associated data.`,
       'error',
       true,
-      () => {
-        const updatedCampaigns = campaigns.filter(c => c.id !== campaign.id);
-        setCampaigns(updatedCampaigns);
-        setStoredData('campaigns', updatedCampaigns);
-        showModal(
-          'Campaign Deleted',
-          `Campaign "${campaign.name}" has been deleted successfully.`,
-          'success'
-        );
+      async () => {
+        try {
+          await axios.delete(`http://localhost:5001/campaigns/${campaign._id}`);
+          showModal(
+            'Campaign Deleted',
+            `Campaign "${campaign.name}" has been deleted successfully.`,
+            'success'
+          );
+          fetchCampaigns();
+        } catch (error) {
+          showModal('Error', 'Failed to delete campaign. Please try again.', 'error');
+        }
       }
     );
   };
@@ -158,12 +168,21 @@ const CampaignManagement = () => {
   };
 
   const getStatusIcon = (status) => {
-    switch (status) {
-      case 'active': return '🟢';
-      case 'upcoming': return '🔵';
-      case 'expired': return '🔴';
-      default: return '⚪';
+    if(status == 'active'){
+      return '🟢';
+    }else if(status == 'upcoming'){
+       return '🔵';
+    }else if(status == 'expired'){
+      return '🔴';
+    }else{
+      return '⚪';
     }
+    // switch (status) {
+      //   case 'active': return '🟢';
+      //   case 'upcoming': return '🔵';
+    //   case 'expired': return '🔴';
+    //   default: return '⚪';
+    // }
   };
 
   return (
@@ -268,6 +287,7 @@ const CampaignManagement = () => {
       <div className="grid gap-4">
         {campaigns.map((campaign) => {
           const status = getCampaignStatus(campaign);
+          console.log('yoooo status', status);
           return (
             <div key={campaign.id} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
               <div className="flex justify-between items-start mb-3">

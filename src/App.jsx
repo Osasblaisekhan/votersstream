@@ -5,16 +5,17 @@ import AdminPages from './admin/Desktop/AdminPages';
 import UserPages from './components/UserPages';
 import AdminLogin from './Auth/AdminLogin';
 import UserLogin from './Auth/userLogin';
-import LandinPage from './admin/Desktop/pages/LandinPage';
+import LandingPageRoute from './LandingPageComponent/LandingPageRoute';
 import Signup from './Auth/userSignup';
 import PrivateRoute from './Auth/PrivateRoute';
+import GeneralNotFound from './Notfound/GeneralNotFound';
 
 const App = () => {
   return (
     <AuthProvider>
       <Router>
         <Routes>
-          <Route path="/" element={<LandinPage/>} />
+          <Route path="/" element={<LandingPageRoute />} />
         
           <Route path="/admin/login/*" element={<AdminLogin />} />
 
@@ -39,6 +40,8 @@ const App = () => {
               </PrivateRoute>
             } 
           />
+
+          <Route path='*' element={<GeneralNotFound />}/>
 
         </Routes>
       </Router>
