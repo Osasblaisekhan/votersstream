@@ -1,17 +1,24 @@
 "use client";
-import React, { useEffect } from "react";
-import { animate, motion, useMotionValue, useTransform } from "motion/react";
+import React, { useEffect, useState } from "react";
 
 const HTMLContent = () => {
-    const count = useMotionValue(0);
-    const rounded = useTransform(count, (latest) => Math.round(latest));
+    const [count, setCount] = useState(0);
 
     useEffect(() => {
-        const controls = animate(count, 100, { duration: 7});
-        return () => controls.stop();
-    }, [count]);
+        const timer = setInterval(() => {
+            setCount(prev => {
+                if (prev >= 100) {
+                    clearInterval(timer);
+                    return 100;
+                }
+                return prev + 1;
+            });
+        }, 70); // Roughly 7 seconds for 100 counts
 
-    return <motion.pre style={text}>{rounded}</motion.pre>;
+        return () => clearInterval(timer);
+    }, []);
+
+    return <pre style={text}>{count}</pre>;
 };
 
 /**

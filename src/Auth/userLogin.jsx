@@ -1,30 +1,62 @@
 import React, { useState } from 'react';
 import { useAuth } from './AuthContext';
 import { useNavigate } from 'react-router-dom';
+import { FaRegEyeSlash, FaRegEye } from "react-icons/fa";
+import { loginUser } from '../utils/emailService';
 
 const UserLogin = () => {
-  const [email, setEmail] = useState('');
+  const [formData, setFormData] = useState({
+    email: '',
+    password: ''
+  });
+  const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [needsVerification, setNeedsVerification] = useState(false);
+  
   const { login } = useAuth();
   const navigate = useNavigate();
-  const [error, setError] = useState('');
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    setNeedsVerification(false);
+    setLoading(true);
     
-    // Get stored users from localStorage
-    const storedUsers = localStorage.getItem('users');
-    const users = storedUsers ? JSON.parse(storedUsers) : [];
-    
-    // Find user with matching email (no password required)
-    const user = users.find(u => u.email === email);
-    
-    if (user) {
-      login(user);
-      navigate('/user');
-    } else {
-      setError('Email not found. Please register first or check your email address.');
+    if (!formData.email || !formData.password) {
+      setError('Please provide both email and password');
+      setLoading(false);
+      return;
     }
+
+    try {
+      const result = await loginUser(formData.email, formData.password);
+      
+      if (result.success) {
+        // User logged in successfully
+        login(result.user);
+        navigate('/user');
+      } else {
+        setError(result.message);
+        if (result.needsVerification) {
+          setNeedsVerification(true);
+        }
+      }
+    } catch (error) {
+      setError('Login failed. Please try again.');
+      console.error('Login error:', error);
+    }
+    
+    setLoading(false);
+  };
+
+  const handleResendVerification = () => {
+    navigate('/user/signup', { 
+      state: { 
+        email: formData.email, 
+        needsVerification: true 
+      } 
+    });
   };
 
   return (
@@ -35,42 +67,85 @@ const UserLogin = () => {
             <span className="text-white text-2xl">🗳️</span>
           </div>
           <h2 className="text-3xl font-extrabold text-gray-900">
-            Voter Login
+            Sign In to Vote
           </h2>
           <p className="mt-2 text-sm text-gray-600">
-            Enter your verified email address to access your voting dashboard
+            Access your verified voter account
           </p>
         </div>
         
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-              Email Address
-            </label>
-            <input
-              id="email"
-              name="email"
-              type="email"
-              required
-              className="appearance-none relative block w-full px-4 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-              placeholder="Enter your verified email address"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
+          <div className="space-y-4">
+            <div>
+              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+                Email Address
+              </label>
+              <input
+                id="email"
+                name="email"
+                type="email"
+                required
+                className="appearance-none relative block w-full px-4 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+                placeholder="Enter your email address"
+                value={formData.email}
+                onChange={(e) => setFormData({...formData, email: e.target.value})}
+              />
+            </div>
+
+            <div>
+              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
+                Password
+              </label>
+              <div className="appearance-none flex items-center relative w-full border border-gray-300 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm">
+                <input
+                  id="password"
+                  name="password"
+                  type={showPassword ? 'text' : 'password'}
+                  required
+                  className="appearance-none relative block w-[95%] px-4 py-3 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:z-10 sm:text-sm"
+                  placeholder="Enter your password"
+                  value={formData.password}
+                  onChange={(e) => setFormData({...formData, password: e.target.value})}
+                />
+                {showPassword ? 
+                  <FaRegEye 
+                    color='black' 
+                    size={20} 
+                    onClick={() => setShowPassword(false)}
+                    className="cursor-pointer"
+                  /> : 
+                  <FaRegEyeSlash 
+                    color='black' 
+                    size={20} 
+                    onClick={() => setShowPassword(true)}
+                    className="cursor-pointer"
+                  />
+                }
+              </div>
+            </div>
           </div>
 
           <div>
             <button
               type="submit"
-              className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors"
+              disabled={loading}
+              className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors disabled:opacity-50"
             >
-              Access Voting Dashboard
+              {loading ? 'Signing in...' : 'Sign In'}
             </button>
           </div>
           
           {error && (
             <div className="bg-red-50 border border-red-200 rounded-lg p-4">
               <div className="text-red-700 text-sm">{error}</div>
+              {needsVerification && (
+                <button
+                  onClick={handleResendVerification}
+                  className="mt-2 text-sm text-indigo-600 hover:text-indigo-500 underline"
+                >
+                  Resend verification email
+                </button>
+              )}
             </div>
           )}
         </form>
