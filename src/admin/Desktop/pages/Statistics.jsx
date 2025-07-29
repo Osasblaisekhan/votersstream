@@ -7,7 +7,9 @@ import LoadingSpinners from './loading';
 
 const Statistics = () => {
   const [isLoading, setIsLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState(null);
+
   const [stats, setStats] = useState({
     totalUsers: 0,
     totalCampaigns: 0,
@@ -15,55 +17,52 @@ const Statistics = () => {
     totalVotes: 0,
     votingPercentage: 0,
     regionalStats: {},
-    campaignStats: []
+    campaignStats: [],
+    regionStats: []
   });
 
   useEffect(() => {
     const fetchStats = async () => {
+      setIsSubmitting(true);
       setIsLoading(true);
       setError(null);
       try {
-        const users = getStoredData('users', []);
-        const [campaignsRes, contestantsRes] = await Promise.all([
-          axios.get('http://localhost:5001/campaigns'),
-          axios.get('http://localhost:5001/contestants'),
+        const [campaignsRes, contestantsRes, usersRes, regionRes] = await Promise.all([
+          axios.get('http://localhost:5000/campaigns'),
+          axios.get('http://localhost:5000/contestants'),
+          axios.get('http://localhost:5000/users'),
+          axios.get('http://localhost:5000/regions')
         ]);
+        
         const campaigns = campaignsRes.data;
         const contestants = contestantsRes.data;
+        const users = usersRes.data;
+        const regions = regionRes.data;
 
         const now = new Date();
-        const activeCampaigns = campaigns.filter(c => {
-          const endDate = new Date(c.endDate);
-          return endDate > now;
-        }).length;
+        const activeCampaigns = campaigns.filter(c => new Date(c.endDate) > now).length;
 
         const votedUsers = users.filter(u => u.hasVoted).length;
         const votingPercentage = users.length > 0 ? ((votedUsers / users.length) * 100).toFixed(1) : 0;
 
         // Calculate regional statistics
         const regionalStats = {};
-        cameroonRegions.forEach(region => {
+        console.log('yoooooooo', regionalStats)
+        regions.forEach(region => {
           let regionVotes = 0;
           contestants.forEach(contestant => {
-            const votes = parseInt(localStorage.getItem(`votes_region_${region}_candidate_${contestant.id}`)) || 0;
-            regionVotes += votes;
+            if (contestant.origin === region.name) { 
+              regionVotes += parseInt(contestant.votes) || 0;
+            }
           });
-          regionalStats[region] = regionVotes;
+          regionalStats[region.name] = regionVotes; // Save votes with region name as key
         });
 
-        // Calculate total votes
-        const totalVotes = Object.values(regionalStats).reduce((sum, votes) => sum + votes, 0);
+        const totalVotes = contestants.reduce((sum, c) => (parseInt(c.votes) + sum), 0);
 
-        // Calculate campaign statistics
         const campaignStats = campaigns.map(campaign => {
-          const campaignContestants = contestants.filter(c => c.campaignId === campaign.id);
-          let campaignVotes = 0;
-          campaignContestants.forEach(contestant => {
-            cameroonRegions.forEach(region => {
-              const votes = parseInt(localStorage.getItem(`votes_region_${region}_candidate_${contestant.id}`)) || 0;
-              campaignVotes += votes;
-            });
-          });
+          const campaignContestants = contestants.filter(c => c.campaignId === campaign._id);
+          const campaignVotes = campaignContestants.reduce((sum, c) => sum + (parseInt(c.votes) || 0), 0);
           return {
             ...campaign,
             totalVotes: campaignVotes,
@@ -78,7 +77,8 @@ const Statistics = () => {
           totalVotes,
           votingPercentage,
           regionalStats,
-          campaignStats
+          campaignStats,
+          regionStats: regions // Store the regions for display
         });
       } catch (err) {
         setError('Failed to load statistics. Please check your connection or try again later.');
@@ -89,21 +89,24 @@ const Statistics = () => {
           totalVotes: 0,
           votingPercentage: 0,
           regionalStats: {},
-          campaignStats: []
+          campaignStats: [],
+          regionStats: []
         });
       } finally {
+        setIsSubmitting(false);
         setIsLoading(false);
       }
     };
     fetchStats();
   }, []);
 
-
-  if (isLoading) {
+  if (isLoading || isSubmitting) {
     return (
       <div className='flex flex-col items-center justify-center min-h-[400px]'>
         <LoadingSpinners />
-        <p className='text-gray-700 mt-4 text-lg animate-pulse'>Loading Statistics, please wait...</p>
+        <p className='text-gray-700 mt-4 text-lg animate-pulse'>
+          {isLoading ? 'Loading Statistics, please wait...' : 'Submitting, please wait...'}
+        </p>
       </div>
     );
   }
@@ -181,10 +184,12 @@ const Statistics = () => {
           Regional Voting Statistics
         </h3>
         <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-          {cameroonRegions.map(region => (
-            <div key={region} className="bg-gray-50 rounded-lg p-4 text-center">
-              <h4 className="font-medium text-gray-900 mb-2">{region}</h4>
-              <p className="text-2xl font-bold text-indigo-600">{stats.regionalStats[region] || 0}</p>
+          {stats.regionStats.map(region => (
+            <div key={region._id} className="bg-gray-50 rounded-lg p-4 text-center">
+              <h4 className="font-medium text-gray-900 mb-2">{region.name}</h4>
+              <p className="text-2xl font-bold text-indigo-600">
+                {stats.regionalStats[region.name] || 0} {/* Access the correct property */}
+              </p>
               <p className="text-sm text-gray-600">votes</p>
             </div>
           ))}
@@ -199,7 +204,7 @@ const Statistics = () => {
         </h3>
         <div className="space-y-4">
           {stats.campaignStats.map(campaign => (
-            <div key={campaign.id} className="border border-gray-200 rounded-lg p-4">
+            <div key={campaign._id} className="border border-gray-200 rounded-lg p-4">
               <div className="flex justify-between items-center mb-2">
                 <h4 className="font-semibold text-gray-900">{campaign.name}</h4>
                 <div className="flex items-center space-x-4 text-sm text-gray-600">

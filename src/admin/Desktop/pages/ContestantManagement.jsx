@@ -8,12 +8,11 @@ import Modal from '../../../components/modal';
 const ContestantManagement = () => {
   const [contestants, setContestants] = useState([]);
   const [isLoading, setIsLoading] = useState(true)
- contestants.map((yoo)=>console.log(yoo));
+
   const [campaigns, setCampaigns] = useState([]);
+  const [regions, setRegions]= useState([]);
   const [showForm, setShowForm] = useState(false);
   const [editingContestant, setEditingContestant] = useState(null);
-
-  console.log('khan', editingContestant);
   const [modal, setModal] = useState({
     isOpen: false,
     title: '',
@@ -26,13 +25,16 @@ const ContestantManagement = () => {
     name: '',
     party: '',
     origin: '',
-    campaign: '',
+    campaignId: '',
     picture:''
   });
 
+  console.log('yoo formdata', formData.campaignId)
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const fetchContestants = async()=>{
     try{
-    const response = await axios.get('http://localhost:5001/contestants');
+    const response = await axios.get('http://localhost:5000/contestants');
     setContestants(response.data)
     }catch(error){
       throw new Error('unable to fetch contestants', error)
@@ -40,10 +42,32 @@ const ContestantManagement = () => {
       setIsLoading(false);
     }
   }
+
+
+    const fetchRegions = async()=>{
+    try{
+      const response = await axios.get('http://localhost:5000/regions');
+      setRegions(response.data)
+    }catch(error){
+      throw new Error('unable to fetch regions', error);
+    }
+  };
+
+  const fetchCampaigns = async()=>{
+    try{
+    const response = await axios.get('http://localhost:5000/campaigns');
+    setCampaigns(response.data)
+    }catch(error){
+      throw new Error('unable to fetch campaigns', error)
+    }finally{
+      setIsLoading(false);
+    }
+  }
   useEffect(() => {
-    // setContestants(getStoredData('contestants', []));
-    setCampaigns(getStoredData('campaigns', []));
     fetchContestants();
+    fetchCampaigns();
+    fetchRegions();
+    // Only run once on mount
   }, []);
 
   const showModal = (title, message, type = 'info', showConfirm = false, onConfirm = null) => {
@@ -70,16 +94,18 @@ const ContestantManagement = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsSubmitting(true);
     const newContestant = {
       ...formData,
-      campaignId: parseInt(formData.campaign),
+      campaignId: formData.campaignId ? formData.campaignId : (editingContestant ? editingContestant.campaignId : undefined),
       votes: editingContestant ? editingContestant.votes : 0,
     };
 
     try {
+      let contestantRes;
       if (editingContestant) {
         // Update existing contestant in DB
-        await axios.put(`http://localhost:5001/contestants/${editingContestant._id}`, newContestant);
+        contestantRes = await axios.put(`http://localhost:5000/contestants/${editingContestant._id}`, newContestant);
         showModal(
           'Contestant Updated',
           `${newContestant.name} has been updated successfully.`,
@@ -87,25 +113,61 @@ const ContestantManagement = () => {
         );
       } else {
         // Add new contestant to DB
-        await axios.post('http://localhost:5001/contestants', newContestant);
+        contestantRes = await axios.post('http://localhost:5000/contestants', newContestant);
         showModal(
           'Contestant Added',
           `${newContestant.name} has been added successfully.`,
           'success'
         );
       }
+
+      // Update campaign's participants array
+      const campaignId = newContestant.campaignId;
+      let addedToCampaign = false;
+      if (campaignId) {
+        try {
+          // Get the contestant's _id (new or updated)
+          const contestantId = (editingContestant ? editingContestant._id : contestantRes.data._id).toString();
+          // Fetch the campaign
+          const campaignRes = await axios.get(`http://localhost:5000/campaigns/${campaignId}`);
+          const campaign = campaignRes.data;
+          let participants = Array.isArray(campaign.participants) ? [...campaign.participants] : [];
+          participants = participants.map(id => id.toString());
+          if (!participants.includes(contestantId)) {
+            participants.push(contestantId);
+            addedToCampaign = true;
+          }
+          await axios.put(`http://localhost:5000/campaigns/${campaignId}`, { ...campaign, participants });
+        } catch (err) {
+          console.error('Error updating campaign participants:', err);
+        }
+      }
+
+      if (addedToCampaign) {
+        // Find the campaign name for a more descriptive message
+        const campaignObj = campaigns.find(c => c._id === campaignId);
+        const campaignName = campaignObj ? campaignObj.name : 'the selected campaign';
+        showModal(
+          'Contestant Assigned to Campaign',
+          `${newContestant.name} has been successfully assigned as a participant in "${campaignName}"!`,
+          'success'
+        );
+      }
+
       fetchContestants(); // Refresh list from DB
       resetForm();
     } catch (error) {
       showModal('Error', 'Failed to save contestant. Please try again.', 'error');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   const resetForm = () => {
     setFormData({
       name: '',
-      profilePicture: '',
-      region: '',
+      picture: '',
+      origin: '',
       campaignId: '',
       party: ''
     });
@@ -119,7 +181,7 @@ const ContestantManagement = () => {
       name: contestant.name,
       picture: contestant.picture,
       origin: contestant.origin,
-      campaign: contestant.campaign,
+      campaignId: contestant.campaignId,
       party: contestant.party
     });
     setShowForm(true);
@@ -133,7 +195,7 @@ const ContestantManagement = () => {
       true,
       async () => {
         try {
-          await axios.delete(`http://localhost:5001/contestants/${contestant._id}`);
+          await axios.delete(`http://localhost:5000/contestants/${contestant._id}`);
           showModal(
             'Contestant Deleted',
             `${contestant.name} has been deleted successfully.`,
@@ -148,7 +210,7 @@ const ContestantManagement = () => {
   };
 
   const getCampaignName = (campaignId) => {
-    const campaign = campaigns.find(c => c.id === campaignId);
+    const campaign = campaigns.find(c => c._id === campaignId || c.id === campaignId);
     return campaign ? campaign.name : 'Unknown Campaign';
   };
 
@@ -214,8 +276,8 @@ const ContestantManagement = () => {
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 >
                   <option value="">Select Region</option>
-                  {cameroonRegions.map(region => (
-                    <option key={region} value={region}>{region}</option>
+                  {regions.map(region => (
+                    <option key={region._id} value={region.name}>{region.name}</option>
                   ))}
                 </select>
               </div>
@@ -226,13 +288,13 @@ const ContestantManagement = () => {
                 </label>
                 <select
                   required
-                  value={formData.campaign}
-                  onChange={(e) => setFormData({...formData, campaign: e.target.value})}
+                  value={formData.campaignId || ''}
+                  onChange={(e) => setFormData({...formData, campaignId: e.target.value})}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 >
                   <option value="">Select Campaign</option>
                   {campaigns.map(campaign => (
-                    <option key={campaign.id} value={campaign.name}>{campaign.name}</option>
+                    <option key={campaign._id} value={campaign._id}>{campaign.name}</option>
                   ))}
                 </select>
               </div>
@@ -260,9 +322,20 @@ const ContestantManagement = () => {
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
+                  className={`px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 flex items-center justify-center ${isSubmitting ? 'opacity-70 cursor-not-allowed' : ''}`}
+                  disabled={isSubmitting}
                 >
-                  {editingContestant ? 'Update' : 'Add'}
+                  {isSubmitting ? (
+                    <span>
+                      <svg className="animate-spin h-5 w-5 inline-block mr-2 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
+                      </svg>
+                      Submitting...
+                    </span>
+                  ) : (
+                    editingContestant ? 'Update' : 'Add'
+                  )}
                 </button>
               </div>
             </form>

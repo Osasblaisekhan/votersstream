@@ -30,7 +30,7 @@ const CampaignManagement = () => {
 
   const fetchCampaigns = async () => {
     try {
-      const response = await axios.get('http://localhost:5001/campaigns');
+      const response = await axios.get('http://localhost:5000/campaigns');
       setCampaigns(response.data);
     } catch (error) {
       showModal('Error', 'Failed to fetch campaigns from server.', 'error');
@@ -90,7 +90,7 @@ const CampaignManagement = () => {
     try {
       if (editingCampaign) {
         // Update campaign
-        await axios.put(`http://localhost:5001/campaigns/${editingCampaign._id}`, newCampaign);
+        await axios.put(`http://localhost:5000/campaigns/${editingCampaign._id}`, newCampaign);
         showModal(
           'Campaign Updated',
           `Campaign "${newCampaign.name}" has been updated successfully.`,
@@ -98,7 +98,7 @@ const CampaignManagement = () => {
         );
       } else {
         // Create campaign
-        await axios.post('http://localhost:5001/campaigns', newCampaign);
+        await axios.post('http://localhost:5000/campaigns', newCampaign);
         showModal(
           'Campaign Created',
           `Campaign "${newCampaign.name}" has been created successfully.`,
@@ -144,7 +144,7 @@ const CampaignManagement = () => {
       true,
       async () => {
         try {
-          await axios.delete(`http://localhost:5001/campaigns/${campaign._id}`);
+          await axios.delete(`http://localhost:5000/campaigns/${campaign._id}`);
           showModal(
             'Campaign Deleted',
             `Campaign "${campaign.name}" has been deleted successfully.`,
@@ -289,7 +289,7 @@ const CampaignManagement = () => {
           const status = getCampaignStatus(campaign);
           console.log('yoooo status', status);
           return (
-            <div key={campaign.id} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+            <div key={campaign._id} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
               <div className="flex justify-between items-start mb-3">
                 <div className="flex-1">
                   <div className="flex items-center space-x-2 mb-2">

@@ -1,14 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../Auth/AuthContext';
-import { getStoredData, setStoredData, cameroonRegions } from '../utils/mockData';
-import Modal from './Modal';
+import axios from 'axios';
+import { cameroonRegions } from '../utils/mockData';
+import Modal from './modal';
+
+const API_URL = 'http://localhost:5000'; // Base URL for API
 
 const Vote = () => {
   const { user, updateUser } = useAuth();
   const [campaigns, setCampaigns] = useState([]);
+  const [getCampaign, setGetCampaign] = useState([]);
   const [selectedCampaign, setSelectedCampaign] = useState(null);
   const [selectedRegion, setSelectedRegion] = useState('');
   const [contestants, setContestants] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [loadingContestants, setLoadingContestants] = useState(false); // New loading state for contestants
   const [modal, setModal] = useState({
     isOpen: false,
     title: '',
@@ -20,24 +26,71 @@ const Vote = () => {
   const [hasVoted, setHasVoted] = useState(false);
 
   useEffect(() => {
-    // Load campaigns and filter active ones
-    const allCampaigns = getStoredData('campaigns', []);
+    const fetchCampaigns = async () => {
+      setLoading(true);
+      try {
+        const response = await axios.get(`${API_URL}/campaigns`);
+        setGetCampaign(response.data);
+      } catch (error) {
+        showModal('Error', 'Failed to fetch campaigns from server.', 'error');
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchCampaigns();
+  }, []);
+
+  const fetchUsers = async () => {
+    setLoading(true);
+    try {
+      const response = await axios.get(`${API_URL}/users`);
+      return response.data;
+    } catch (error) {
+      showModal('Error', 'Failed to fetch users from server.', 'error');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    const loadUserData = async () => {
+      const users = await fetchUsers();
+      if (user) {
+        const currentUser = users.find(u => u._id === user._id);
+        setHasVoted(currentUser?.hasVoted || false);
+      }
+    };
+    loadUserData();
+  }, [user]);
+
+  useEffect(() => {
     const now = new Date();
-    const activeCampaigns = allCampaigns.filter(campaign => {
+    const activeCampaigns = getCampaign.filter(campaign => {
       const endDate = new Date(campaign.endDate);
       return endDate > now;
     });
     setCampaigns(activeCampaigns);
-
-    // Check if user has already voted
-    setHasVoted(user?.hasVoted || false);
-  }, [user]);
+  }, [getCampaign]);
 
   useEffect(() => {
     if (selectedCampaign) {
-      const allContestants = getStoredData('contestants', []);
-      const campaignContestants = allContestants.filter(c => c.campaignId === selectedCampaign.id);
-      setContestants(campaignContestants);
+      const fetchContestants = async () => {
+        setLoadingContestants(true); // Set loading state to true
+        try {
+          const response = await axios.get(`${API_URL}/contestants`);
+          const campaignContestants = response.data.filter(
+            c => c.campaignId === selectedCampaign._id
+          );
+          setContestants(campaignContestants);
+        } catch (error) {
+          showModal('Error', 'Failed to fetch contestants from server.', 'error');
+        } finally {
+          setLoadingContestants(false); // Set loading state to false
+        }
+      };
+      fetchContestants();
+    } else {
+      setContestants([]);
     }
   }, [selectedCampaign]);
 
@@ -82,54 +135,46 @@ const Vote = () => {
       return;
     }
 
-    // Show confirmation modal
     showModal(
       'Confirm Your Vote',
-      `Are you sure you want to vote for ${contestant.name} from ${contestant.party}?\n\nThis action cannot be undone and you will not be able to vote again in any campaign.`,
+      `Are you sure you want to vote for ${contestant.name} from ${contestant.party}? This action cannot be undone.`,
       'warning',
       true,
       () => processVote(contestant)
     );
   };
 
-  const processVote = (contestant) => {
-    // Update vote count in localStorage
-    const voteKey = `votes_region_${selectedRegion}_candidate_${contestant.id}`;
-    const currentVotes = parseInt(localStorage.getItem(voteKey)) || 0;
-    localStorage.setItem(voteKey, (currentVotes + 1).toString());
-
-    // Update user's voting status - mark as voted globally
-    const users = getStoredData('users', []);
-    const updatedUsers = users.map(u => 
-      u.id === user.id 
-        ? { 
-            ...u, 
-            hasVoted: true, 
-            votedCampaign: selectedCampaign.id, 
-            votedContestant: contestant.id,
-            votedRegion: selectedRegion,
-            voteTimestamp: new Date().toISOString()
-          }
-        : u
-    );
-    setStoredData('users', updatedUsers);
-
-    // Update current user context
-    updateUser({
-      hasVoted: true,
-      votedCampaign: selectedCampaign.id,
-      votedContestant: contestant.id,
-      votedRegion: selectedRegion,
-      voteTimestamp: new Date().toISOString()
-    });
-
-    setHasVoted(true);
-    showModal(
-      'Vote Recorded Successfully!',
-      `Thank you for voting for ${contestant.name}!\n\nYour vote has been recorded and you cannot vote again in any campaign.`,
-      'success'
-    );
+  const processVote = async (contestant) => {
+    try {
+      await axios.patch(`${API_URL}/users/${user._id}`, {
+        hasVoted: true,
+        votedCampaign: selectedCampaign._id,
+        votedContestant: contestant.id,
+        votedRegion: selectedRegion,
+        voteTimestamp: new Date().toISOString()
+      });
+      updateUser({
+        ...user,
+        hasVoted: true,
+        votedCampaign: selectedCampaign._id,
+        votedContestant: contestant.id,
+        votedRegion: selectedRegion,
+        voteTimestamp: new Date().toISOString()
+      });
+      setHasVoted(true);
+      showModal(
+        'Vote Recorded Successfully!',
+        `Thank you for voting for ${contestant.name}! Your vote has been recorded.`,
+        'success'
+      );
+    } catch {
+      showModal('Error', 'Failed to update user voting status in the backend.', 'error');
+    }
   };
+
+  if (loading) {
+    return <div>Loading...</div>; // Loading state can be enhanced with a spinner or animation
+  }
 
   if (hasVoted) {
     return (
@@ -175,10 +220,10 @@ const Vote = () => {
           <div className="grid gap-4 md:grid-cols-2">
             {campaigns.map((campaign) => (
               <div
-                key={campaign.id}
+                key={campaign._id}
                 onClick={() => setSelectedCampaign(campaign)}
-                className={`cursor-pointer border-2 rounded-lg p-4 transition-all hover:shadow-md ${
-                  selectedCampaign?.id === campaign.id 
+                className={`cursor-pointer border-2 rounded-lg p-4 transition-all ${
+                  selectedCampaign?._id === campaign._id 
                     ? 'border-indigo-500 bg-indigo-50' 
                     : 'border-gray-200 hover:border-gray-300'
                 }`}
@@ -189,7 +234,7 @@ const Vote = () => {
                   <span>Ends: {new Date(campaign.endDate).toLocaleDateString()}</span>
                   <span className="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs">Active</span>
                 </div>
-                {selectedCampaign?.id === campaign.id && (
+                {selectedCampaign?._id === campaign._id && (
                   <div className="mt-3 text-sm font-medium text-indigo-600">
                     ✓ Selected for voting
                   </div>
@@ -238,39 +283,58 @@ const Vote = () => {
           <h3 className="text-lg font-semibold text-gray-900">
             Candidates for {selectedCampaign.name}
           </h3>
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {contestants.map(candidate => (
-              <div key={candidate.id} className="bg-white border border-gray-200 rounded-lg p-6 hover:shadow-lg transition-shadow">
-                <div className="text-center">
-                  <div className="w-24 h-24 mx-auto mb-4 bg-gray-200 rounded-full overflow-hidden">
-                    <img 
-                      src={candidate.profilePicture} 
-                      alt={candidate.name}
-                      className="w-full h-full object-cover"
-                      onError={(e) => {
-                        e.target.style.display = 'none';
-                        e.target.nextSibling.style.display = 'flex';
-                      }}
-                    />
-                    <div className="w-full h-full flex items-center justify-center text-gray-400" style={{display: 'none'}}>
-                      👤
+          {loadingContestants ? ( // Show loading state for contestants
+            <div className="text-center py-6">Loading candidates...</div>
+          ) : (
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+              {contestants.map(candidate => (
+                <div key={candidate._id} className="bg-white border border-gray-200 rounded-lg p-6 hover:shadow-lg transition-shadow">
+                  <div className="text-center">
+                    <div className="w-24 h-24 mx-auto mb-4 bg-gray-200 rounded-full overflow-hidden">
+                            <div>
+                                  {
+                        candidate.picture ?
+                        <img 
+                          src={candidate.picture} 
+                          alt={candidate.name}
+                          className="w-full h-full object-cover"
+                          onError={(e) => {
+                            e.target.style.display = 'none';
+                            e.target.nextSibling.style.display = 'flex';
+                          }}
+                        />:
+                        <img 
+                          src={candidate.p} 
+                          alt={candidate.name}
+                          className="w-full h-full object-cover"
+                          onError={(e) => {
+                            e.target.style.display = 'none';
+                            e.target.nextSibling.style.display = 'flex';
+                          }}
+                        />
+                      }
+                      
+                            </div>
+                      <div className="w-full h-full flex items-center justify-center text-gray-400" style={{display: 'none'}}>
+                        👤
+                      </div>
                     </div>
+                    
+                    <h3 className="text-lg font-semibold text-gray-900 mb-1">{candidate.name}</h3>
+                    <p className="text-sm text-gray-600 mb-2">{candidate.party}</p>
+                    <p className="text-xs text-gray-500 mb-4">Origin: {candidate.region}</p>
+                    
+                    <button
+                      onClick={() => handleVote(candidate)}
+                      className="w-full py-2 px-4 rounded-lg font-medium transition-colors bg-indigo-600 text-white hover:bg-indigo-700"
+                    >
+                      Vote for {candidate.name}
+                    </button>
                   </div>
-                  
-                  <h3 className="text-lg font-semibold text-gray-900 mb-1">{candidate.name}</h3>
-                  <p className="text-sm text-gray-600 mb-2">{candidate.party}</p>
-                  <p className="text-xs text-gray-500 mb-4">Origin: {candidate.region}</p>
-                  
-                  <button
-                    onClick={() => handleVote(candidate)}
-                    className="w-full py-2 px-4 rounded-lg font-medium transition-colors bg-indigo-600 text-white hover:bg-indigo-700"
-                  >
-                    Vote for {candidate.name}
-                  </button>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
       )}
 

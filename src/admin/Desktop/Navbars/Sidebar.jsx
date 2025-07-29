@@ -10,7 +10,7 @@ const Sidebar = () => {
         <div>
             <nav className='text-white mt-6 mb-6 hidden md:block'>
                 <ul className='flex flex-col gap-20 items-center'>
-                    <Link to={'/admin/'} className='w-40 h-9 text-center border-b-2 flex items-center gap-1 justify-center hover:text-amber-700 cursor-pointer hover:bg-amber-100 transition-colors'>
+                    <Link to={'/admin'} className='w-40 h-9 text-center border-b-2 flex items-center gap-1 justify-center hover:text-amber-700 cursor-pointer hover:bg-amber-100 transition-colors'>
                         <IoHomeSharp size={20} color='white' />
                         <li>Home</li>
                     </Link>

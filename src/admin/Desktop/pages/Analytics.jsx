@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { getStoredData, cameroonRegions } from '../../../utils/mockData';
+// import { getStoredData } from '../../../utils/mockData';
 import axios from 'axios';
 import { FiDownload, FiBarChart, FiTrendingUp, FiUsers, FiMapPin, FiCalendar } from 'react-icons/fi';
 import Chart from 'react-apexcharts';
@@ -8,6 +8,7 @@ const Analytics = () => {
   const [campaigns, setCampaigns] = useState([]);
   const [contestants, setContestants] = useState([]);
   const [users, setUsers] = useState([]);
+  const [regions, setRegions] = useState([]);
   const [selectedCampaign, setSelectedCampaign] = useState('');
   const [viewType, setViewType] = useState('nationwide');
   const [isLoading, setIsLoading] = useState(true);
@@ -18,14 +19,18 @@ const Analytics = () => {
       setIsLoading(true);
       setError(null);
       try {
-        const users = getStoredData('users', []);
-        const [campaignsRes, contestantsRes] = await Promise.all([
-          axios.get('http://localhost:5001/campaigns'),
-          axios.get('http://localhost:5001/contestants'),
+        // const users = getStoredData('users', []);
+        const [campaignsRes, contestantsRes, regionRes, usersRes] = await Promise.all([
+          axios.get('http://localhost:5000/campaigns'),
+          axios.get('http://localhost:5000/contestants'),
+          axios.get('http://localhost:5000/regions'),
+          axios.get('http://localhost:5000/users')
+
         ]);
         setCampaigns(campaignsRes.data);
         setContestants(contestantsRes.data);
-        setUsers(users);
+        setRegions(regionRes.data);
+        setUsers(usersRes.data);
       } catch (err) {
         setError('Failed to load analytics data. Please check your connection or try again later.');
       } finally {
@@ -35,49 +40,69 @@ const Analytics = () => {
     fetchData();
   }, []);
 
+  // Improved regionalStats logic
   const getVotingData = () => {
     if (!selectedCampaign) return { nationwide: [], regional: {} };
-    
-    const campaignContestants = contestants.filter(c => c.campaignId === parseInt(selectedCampaign));
-    
+
+    // Filter contestants for the selected campaign
+    const campaignContestants = contestants.filter(c => {
+      return c.campaignId === selectedCampaign || c.campaignId === parseInt(selectedCampaign) || c.campaignId === String(selectedCampaign);
+    });
+    const regionNames = regions.map(r => r.name);
+
+    // Calculate total votes for each contestant
     const contestantsWithVotes = campaignContestants.map(contestant => {
       let totalVotes = 0;
+      // If backend provides a 'votes' array with region info, use it. Otherwise, fallback to 'votes' number and 'origin'.
+      if (Array.isArray(contestant.votes)) {
+        // votes: [{ region: 'North', count: 5 }, ...]
+        totalVotes = contestant.votes.reduce((sum, v) => sum + (v.count || 0), 0);
+      } else {
+        totalVotes = parseInt(contestant.votes) || 0;
+      }
+
+      // Build regionalVotes: { regionName: voteCount }
       const regionalVotes = {};
-      
-      cameroonRegions.forEach((region, index) => {
-        const votes = parseInt(localStorage.getItem(`votes_region_${region}_candidate_${contestant.id}`)) || 0;
-        regionalVotes[region] = votes;
-        totalVotes += votes;
+      console.log('yoo regional vote', regionalVotes);
+      regionNames.forEach(region => {
+        if (Array.isArray(contestant.votes)) {
+          const regionVote = contestant.votes.find(v => v.region === region);
+          regionalVotes[region] = regionVote ? regionVote.count : 0;
+        } else {
+          // Fallback: assign all votes to origin region
+          regionalVotes[region] = contestant.origin === region ? totalVotes : 0;
+        }
       });
-      
       return {
         ...contestant,
         totalVotes,
         regionalVotes
       };
     });
-    
-    const nationwide = contestantsWithVotes.sort((a, b) => b.totalVotes - a.totalVotes);
-    
+
+    // Sort nationwide by total votes
+    const nationwide = [...contestantsWithVotes].sort((a, b) => b.totalVotes - a.totalVotes);
+
+    // Build regional stats: for each region, sort candidates by votes in that region
     const regional = {};
-    cameroonRegions.forEach(region => {
+    regionNames.forEach(region => {
       regional[region] = contestantsWithVotes
         .map(c => ({ ...c, votes: c.regionalVotes[region] }))
         .sort((a, b) => b.votes - a.votes);
     });
-    
+
     return { nationwide, regional };
   };
 
   const exportVotingData = () => {
     const { nationwide } = getVotingData();
-    const selectedCampaignData = campaigns.find(c => c.id === parseInt(selectedCampaign));
-    
+    const selectedCampaignData = campaigns.find(c => c.id === parseInt(selectedCampaign) || c._id === selectedCampaign);
+    const regionNames = regions.map(r => r.name);
     const exportData = {
       campaign: selectedCampaignData,
       results: {
         nationwide: nationwide,
-        byRegion: cameroonRegions.map(region => ({
+        byRegion: regionNames.map(region => ({
           region,
           results: nationwide.map(candidate => ({
             name: candidate.name,
@@ -92,12 +117,9 @@ const Analytics = () => {
         exportDate: new Date().toISOString()
       }
     };
-    
     const dataStr = JSON.stringify(exportData, null, 2);
     const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
-    
     const exportFileDefaultName = `voting_results_${selectedCampaignData?.name.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.json`;
-    
     const linkElement = document.createElement('a');
     linkElement.setAttribute('href', dataUri);
     linkElement.setAttribute('download', exportFileDefaultName);
@@ -140,7 +162,7 @@ const Analytics = () => {
   };
 
   const { nationwide, regional } = getVotingData();
-  const selectedCampaignData = campaigns.find(c => c.id === parseInt(selectedCampaign));
+  const selectedCampaignData = campaigns.find(c => c.id === parseInt(selectedCampaign) || c._id === selectedCampaign);
 
   if (isLoading) {
     return (
@@ -292,7 +314,7 @@ const Analytics = () => {
         >
           <option value="">Choose a campaign to analyze</option>
           {campaigns.map(campaign => (
-            <option key={campaign.id} value={campaign.id}>{campaign.name}</option>
+            <option key={campaign._id} value={campaign._id}>{campaign.name}</option>
           ))}
         </select>
       </div>
@@ -400,7 +422,7 @@ const Analytics = () => {
                     const percentage = totalVotes > 0 ? ((contestant.totalVotes / totalVotes) * 100).toFixed(1) : 0;
                     
                     return (
-                      <div key={contestant.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                      <div key={contestant._id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
                         <div className="flex items-center space-x-4">
                           <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-bold ${
                             index === 0 ? 'bg-yellow-500' :
@@ -433,12 +455,12 @@ const Analytics = () => {
                 Results by Region
               </h3>
               <div className="grid gap-6 md:grid-cols-2">
-                {cameroonRegions.map(region => (
-                  <div key={region} className="bg-white border border-gray-200 rounded-xl p-6">
-                    <h4 className="font-semibold text-gray-900 mb-4 text-lg">{region} Region</h4>
+                {regions.map(region => (
+                  <div key={region._id} className="bg-white border border-gray-200 rounded-xl p-6">
+                    <h4 className="font-semibold text-gray-900 mb-4 text-lg">{region.name} Region</h4>
                     <div className="space-y-3">
-                      {regional[region]?.map((contestant, index) => (
-                        <div key={contestant.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                      {regional[region.name]?.map((contestant, index) => (
+                        <div key={contestant._id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                           <div className="flex items-center space-x-3">
                             <span className="w-8 h-8 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center text-sm font-medium">
                               {index + 1}
@@ -454,7 +476,7 @@ const Analytics = () => {
                           </div>
                         </div>
                       ))}
-                      {regional[region]?.length === 0 && (
+                      {regional[region.name]?.length === 0 && (
                         <p className="text-center text-gray-500 py-4">No votes in this region</p>
                       )}
                     </div>

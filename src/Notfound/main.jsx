@@ -6,13 +6,13 @@ const Main = () => {
       const [isLoading, setIsloading] = useState(true);
     
           const fetchdata = async ()=>{
-            const response = await fetch('http://localhost:5001/contestants');
+            const response = await fetch('http://localhost:5000/contestants');
             const res = await response.json()
             res.map((r)=>console.log(r))
           }
 
           const fetchCampaigns = async ()=>{
-            const response = await fetch('http://localhost:5001/campaigns');
+            const response = await fetch('http://localhost:5000/campaigns');
             const res = await response.json()
             console.log(res)
           }

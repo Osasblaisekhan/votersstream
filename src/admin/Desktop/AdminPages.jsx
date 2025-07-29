@@ -7,6 +7,7 @@ import Sidebar from './Navbars/sideBar';
 import User from './Navbars/user';
 import Home from './pages/Home';
 import CampaignManagement from './pages/CampaignManagement';
+import Dashboard from './pages/Dashboard';
 import ContestantManagement from './pages/ContestantManagement';
 import Analytics from './pages/Analytics';
 import Statistics from './pages/Statistics';
@@ -51,6 +52,7 @@ const AdminPages = () => {
                     <div className='hidden md:block'>
                         <Routes>
                             <Route path="/" exact element={<Home />} />
+                             <Route path='/dashboard' element={<Dashboard/>}/>
                             <Route path="/campaigns" element={<CampaignManagement />} />
                             <Route path="/contestants" element={<ContestantManagement />} />
                             <Route path="/analytics" element={<Analytics />} />
@@ -62,6 +64,7 @@ const AdminPages = () => {
                     <div className='block md:hidden'>
                         <Routes>
                             <Route path='/' element={<Home />} />
+                            <Route path='/dashboard' element={<Dashboard/>}/>
                             <Route path='/campaigns' element={<CampaignManagement />} />
                             <Route path='/contestants' element={<ContestantManagement />} />
                             <Route path='/analytics' element={<Analytics />} />

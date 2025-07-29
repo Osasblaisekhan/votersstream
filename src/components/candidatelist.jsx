@@ -15,7 +15,7 @@ const CandidateList = ({ candidates, onVote, disabled, selectedRegion }) => {
   return (
     <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
       {candidates.map(candidate => (
-        <div key={candidate.id} className="bg-white border border-gray-200 rounded-lg p-6 hover:shadow-lg transition-shadow">
+        <div key={candidate._id} className="bg-white border border-gray-200 rounded-lg p-6 hover:shadow-lg transition-shadow">
           <div className="text-center">
             <div className="w-24 h-24 mx-auto mb-4 bg-gray-200 rounded-full overflow-hidden">
               {candidate.profilePicture ? (

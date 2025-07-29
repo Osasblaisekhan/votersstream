@@ -7,7 +7,9 @@ import { FiLogOut, FiUserPlus } from 'react-icons/fi';
 import { MdHowToVote } from 'react-icons/md';
 import { AiOutlineBarChart } from 'react-icons/ai';
 import Vote from './vote';
+import UserTime from './userTime';
 import Results from './results'; 
+
 import { initializeMockData } from '../utils/mockData';
 
 const UserPages = () => {
@@ -42,14 +44,14 @@ const UserPages = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center space-x-8">
-              <h1 className="text-xl font-bold">Cameroon Voting Portal</h1>
+              <h3 className="text-xl font-bold">Cameroon Voting Portal</h3>
               
               <nav className="hidden md:flex space-x-4">
                 <button
                   onClick={() => navigate('/user/vote')}
                   className={`flex items-center space-x-2 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
                     location.pathname === '/user/vote'
-                      ? 'bg-white bg-opacity-20 text-white'
+                      ? 'bg-white bg-opacity-20 text-blue-800'
                       : 'text-indigo-100 hover:bg-white hover:bg-opacity-10 hover:text-white'
                   }`}
                 >
@@ -61,7 +63,7 @@ const UserPages = () => {
                   onClick={() => navigate('/user/results')}
                   className={`flex items-center space-x-2 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
                     location.pathname === '/user/results'
-                      ? 'bg-white bg-opacity-20 text-white'
+                      ? 'bg-white bg-opacity-20 text-blue-800'
                       : 'text-indigo-100 hover:bg-white hover:bg-opacity-10 hover:text-white'
                   }`}
                 >
@@ -69,6 +71,12 @@ const UserPages = () => {
                   <span>Results</span>
                 </button>
               </nav>
+            </div>
+
+            <div>
+              <h2>
+                <UserTime />
+              </h2>
             </div>
 
             <div className="flex items-center space-x-4">
@@ -171,9 +179,10 @@ const UserPages = () => {
         </Routes>
       </main>
       
-      <footer className="bg-gray-800 text-white py-4 mt-12">
+      <footer className="bg-gray-800 py-4 mt-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <p>&copy; 2025 Cameroon Voting Portal. All rights reserved.</p>
+          <h3 className='text-white font-bold'>&copy; 2025 Cameroon Voting Portal. All rights reserved.</h3>
+          <h3><UserTime /></h3>
         </div>
       </footer>
     </div>
