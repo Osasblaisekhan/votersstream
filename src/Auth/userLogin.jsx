@@ -104,6 +104,7 @@ const UserLogin = () => {
                   required
                   className="appearance-none relative block w-[95%] px-4 py-3 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:z-10 sm:text-sm"
                   placeholder="Enter your password"
+                  autocomplete="current-password"
                   value={formData.password}
                   onChange={(e) => setFormData({...formData, password: e.target.value})}
                 />

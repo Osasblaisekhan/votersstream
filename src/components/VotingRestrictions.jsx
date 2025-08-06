@@ -2,7 +2,7 @@ import React from 'react';
 import { FiAlertCircle, FiCheckCircle } from 'react-icons/fi';
 
 const VotingRestrictions = ({ user, selectedCampaign }) => {
-  const hasVotedInCampaign = user?.votedCampaign === selectedCampaign?.id;
+  const hasVotedInCampaign = user?.votedCampaign === selectedCampaign?._id; // Ensure using _id
   const hasVotedAnywhere = user?.hasVoted;
 
   if (hasVotedAnywhere) {

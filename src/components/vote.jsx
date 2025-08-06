@@ -3,6 +3,7 @@ import { useAuth } from '../Auth/AuthContext';
 import axios from 'axios';
 import { cameroonRegions } from '../utils/mockData';
 import Modal from './modal';
+import VotingRestrictions from './VotingRestrictions';
 
 const API_URL = 'http://localhost:5000'; // Base URL for API
 
@@ -14,7 +15,7 @@ const Vote = () => {
   const [selectedRegion, setSelectedRegion] = useState('');
   const [contestants, setContestants] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [loadingContestants, setLoadingContestants] = useState(false); // New loading state for contestants
+  const [loadingContestants, setLoadingContestants] = useState(false);
   const [modal, setModal] = useState({
     isOpen: false,
     title: '',
@@ -75,7 +76,7 @@ const Vote = () => {
   useEffect(() => {
     if (selectedCampaign) {
       const fetchContestants = async () => {
-        setLoadingContestants(true); // Set loading state to true
+        setLoadingContestants(true);
         try {
           const response = await axios.get(`${API_URL}/contestants`);
           const campaignContestants = response.data.filter(
@@ -85,7 +86,7 @@ const Vote = () => {
         } catch (error) {
           showModal('Error', 'Failed to fetch contestants from server.', 'error');
         } finally {
-          setLoadingContestants(false); // Set loading state to false
+          setLoadingContestants(false);
         }
       };
       fetchContestants();
@@ -149,7 +150,7 @@ const Vote = () => {
       await axios.patch(`${API_URL}/users/${user._id}`, {
         hasVoted: true,
         votedCampaign: selectedCampaign._id,
-        votedContestant: contestant.id,
+        votedContestant: contestant._id,
         votedRegion: selectedRegion,
         voteTimestamp: new Date().toISOString()
       });
@@ -157,7 +158,7 @@ const Vote = () => {
         ...user,
         hasVoted: true,
         votedCampaign: selectedCampaign._id,
-        votedContestant: contestant.id,
+        votedContestant: contestant._id,
         votedRegion: selectedRegion,
         voteTimestamp: new Date().toISOString()
       });
@@ -173,22 +174,13 @@ const Vote = () => {
   };
 
   if (loading) {
-    return <div>Loading...</div>; // Loading state can be enhanced with a spinner or animation
+    return <div>Loading...</div>;
   }
 
   if (hasVoted) {
     return (
       <div className="max-w-4xl mx-auto p-6">
-        <div className="bg-green-50 border border-green-200 rounded-lg p-6 text-center">
-          <div className="text-green-600 text-6xl mb-4">✅</div>
-          <h2 className="text-2xl font-bold text-green-800 mb-2">Vote Recorded Successfully!</h2>
-          <p className="text-green-700">
-            Thank you for participating in the democratic process. Your vote has been securely recorded.
-          </p>
-          <p className="text-green-600 text-sm mt-2">
-            You cannot vote again in any campaign. Each user is limited to one vote in the entire system.
-          </p>
-        </div>
+        <VotingRestrictions user={user} selectedCampaign={selectedCampaign} />
       </div>
     );
   }
@@ -283,7 +275,7 @@ const Vote = () => {
           <h3 className="text-lg font-semibold text-gray-900">
             Candidates for {selectedCampaign.name}
           </h3>
-          {loadingContestants ? ( // Show loading state for contestants
+          {loadingContestants ? (
             <div className="text-center py-6">Loading candidates...</div>
           ) : (
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
@@ -291,30 +283,29 @@ const Vote = () => {
                 <div key={candidate._id} className="bg-white border border-gray-200 rounded-lg p-6 hover:shadow-lg transition-shadow">
                   <div className="text-center">
                     <div className="w-24 h-24 mx-auto mb-4 bg-gray-200 rounded-full overflow-hidden">
-                            <div>
-                                  {
-                        candidate.picture ?
-                        <img 
-                          src={candidate.picture} 
-                          alt={candidate.name}
-                          className="w-full h-full object-cover"
-                          onError={(e) => {
-                            e.target.style.display = 'none';
-                            e.target.nextSibling.style.display = 'flex';
-                          }}
-                        />:
-                        <img 
-                          src={candidate.p} 
-                          alt={candidate.name}
-                          className="w-full h-full object-cover"
-                          onError={(e) => {
-                            e.target.style.display = 'none';
-                            e.target.nextSibling.style.display = 'flex';
-                          }}
-                        />
-                      }
-                      
-                            </div>
+                      <div>
+                        {candidate.picture ? (
+                          <img 
+                            src={candidate.picture} 
+                            alt={candidate.name}
+                            className="w-full h-full object-cover"
+                            onError={(e) => {
+                              e.target.style.display = 'none';
+                              e.target.nextSibling.style.display = 'flex';
+                            }}
+                          />
+                        ) : (
+                          <img 
+                            src={candidate.p} 
+                            alt={candidate.name}
+                            className="w-full h-full object-cover"
+                            onError={(e) => {
+                              e.target.style.display = 'none';
+                              e.target.nextSibling.style.display = 'flex';
+                            }}
+                          />
+                        )}
+                      </div>
                       <div className="w-full h-full flex items-center justify-center text-gray-400" style={{display: 'none'}}>
                         👤
                       </div>
