@@ -1,23 +1,27 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import './Admin.css'; 
 import Time from './Navbars/Time';
 import Navbar from './Navbars/Navbar';
-import Sidebar from './Navbars/Sidebar';
+import Sidebar from './Navbars/sideBar';
 import User from './Navbars/user';
 import Home from './pages/Home';
+import CampaignManagement from './pages/CampaignManagement';
 import Dashboard from './pages/Dashboard';
-import CreateCampaigns from './pages/Create';
-import CreateContestant from './pages/CreateContestant';
-import View from './pages/View';
+import ContestantManagement from './pages/ContestantManagement';
+import Analytics from './pages/Analytics';
 import Statistics from './pages/Statistics';
-import Edit from './pages/Edit';
 import NotFound from './pages/NotFound';
 import UserMobile from '../Mobile/MobileNav/UserMobile';
 import MobileNavbar from '../Mobile/MobileNav/NavMobile';
 import MobileHamburger from '../Mobile/MobilePages/MobileHamburger';
+import { initializeMockData } from '../../utils/mockData';
 
 const AdminPages = () => {
+    useEffect(() => {
+        initializeMockData();
+    }, []);
+
     return (
         <div>
             <div id="container">
@@ -46,31 +50,28 @@ const AdminPages = () => {
 
                 <div id="main" className='overflow-y-scroll'>
                     <div className='hidden md:block'>
-                    <Routes>
-                        <Route path="/" exact element={<Home />} />
-                        <Route path="/dashboard" element={<Dashboard />} />
-                        <Route path="/createCampaign" element={<CreateCampaigns />} />
-                        <Route path="/contestants" element={<CreateContestant />} />
-                        <Route path="/viewCampaigns" element={<View />} />
-                        <Route path="/statistics" element={<Statistics />} />
-                        <Route path="/editPage/:index" element={<Edit />} />
-                        <Route path="*" element={<NotFound />} /> {/* Optional 404 handler */}
-                    </Routes>
+                        <Routes>
+                            <Route path="/" exact element={<Home />} />
+                             <Route path='/dashboard' element={<Dashboard/>}/>
+                            <Route path="/campaigns" element={<CampaignManagement />} />
+                            <Route path="/contestants" element={<ContestantManagement />} />
+                            <Route path="/analytics" element={<Analytics />} />
+                            <Route path="/statistics" element={<Statistics />} />
+                            <Route path="*" element={<NotFound />} />
+                        </Routes>
                     </div>
-<div className=''>
-    <div className='block md:hidden'>
-        <Routes>
-            <Route path='/' element={<Home />} />
-            <Route path='/dashboard' element={<Dashboard />} />
-            <Route path='/createCampaign' element={<CreateCampaigns />} />
-            <Route path='/contestants' element={<CreateContestant />} />
-            <Route path='/viewCampaigns' element={<View />} />
-            <Route path='/statistics' element={<Statistics />} />
-            <Route path='/editPage/:index' element={<Edit />} />
-            <Route path='*' element={<NotFound />} />
-        </Routes>
-    </div>
-</div>
+                    
+                    <div className='block md:hidden'>
+                        <Routes>
+                            <Route path='/' element={<Home />} />
+                            <Route path='/dashboard' element={<Dashboard/>}/>
+                            <Route path='/campaigns' element={<CampaignManagement />} />
+                            <Route path='/contestants' element={<ContestantManagement />} />
+                            <Route path='/analytics' element={<Analytics />} />
+                            <Route path='/statistics' element={<Statistics />} />
+                            <Route path='*' element={<NotFound />} />
+                        </Routes>
+                    </div>
                 </div>
 
                 <footer id="footer">
