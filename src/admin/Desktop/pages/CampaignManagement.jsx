@@ -5,7 +5,8 @@ import Modal from '../../../components/modal';
 
 const CampaignManagement = () => {
   const [campaigns, setCampaigns] = useState([]);
-
+//API CALLS
+  const API_BASE_URL = import.meta.env.VITE_API_URL;
   console.log('yoo cam', campaigns);
   const [showForm, setShowForm] = useState(false);
   const [editingCampaign, setEditingCampaign] = useState(null);
@@ -30,7 +31,7 @@ const CampaignManagement = () => {
 
   const fetchCampaigns = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/campaigns');
+      const response = await axios.get(`${API_BASE_URL}/campaigns`);
       setCampaigns(response.data);
     } catch (error) {
       showModal('Error', 'Failed to fetch campaigns from server.', 'error');
@@ -90,7 +91,7 @@ const CampaignManagement = () => {
     try {
       if (editingCampaign) {
         // Update campaign
-        await axios.put(`http://localhost:5000/campaigns/${editingCampaign._id}`, newCampaign);
+        await axios.put(`${API_BASE_URL}/campaigns/${editingCampaign._id}`, newCampaign);
         showModal(
           'Campaign Updated',
           `Campaign "${newCampaign.name}" has been updated successfully.`,
@@ -98,7 +99,7 @@ const CampaignManagement = () => {
         );
       } else {
         // Create campaign
-        await axios.post('http://localhost:5000/campaigns', newCampaign);
+        await axios.post(`${API_BASE_URL}/campaigns`, newCampaign);
         showModal(
           'Campaign Created',
           `Campaign "${newCampaign.name}" has been created successfully.`,
@@ -144,7 +145,7 @@ const CampaignManagement = () => {
       true,
       async () => {
         try {
-          await axios.delete(`http://localhost:5000/campaigns/${campaign._id}`);
+          await axios.delete(`${API_BASE_URL}/campaigns/${campaign._id}`);
           showModal(
             'Campaign Deleted',
             `Campaign "${campaign.name}" has been deleted successfully.`,

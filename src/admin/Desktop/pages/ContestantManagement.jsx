@@ -5,6 +5,9 @@ import { getStoredData, setStoredData, cameroonRegions } from '../../../utils/mo
 import { FiPlus, FiEdit2, FiTrash2, FiUser, FiMapPin } from 'react-icons/fi';
 import Modal from '../../../components/modal';
 
+
+//API CALLS
+const API_BASE_URL = import.meta.env.VITE_API_URL;
 const ContestantManagement = () => {
   const [contestants, setContestants] = useState([]);
   const [isLoading, setIsLoading] = useState(true)
@@ -34,7 +37,7 @@ const ContestantManagement = () => {
 
   const fetchContestants = async()=>{
     try{
-    const response = await axios.get('http://localhost:5000/contestants');
+    const response = await axios.get(`${API_BASE_URL}/contestants`);
     setContestants(response.data)
     }catch(error){
       throw new Error('unable to fetch contestants', error)
@@ -46,7 +49,7 @@ const ContestantManagement = () => {
 
     const fetchRegions = async()=>{
     try{
-      const response = await axios.get('http://localhost:5000/regions');
+      const response = await axios.get(`${API_BASE_URL}/regions`);
       setRegions(response.data)
     }catch(error){
       throw new Error('unable to fetch regions', error);
@@ -55,7 +58,7 @@ const ContestantManagement = () => {
 
   const fetchCampaigns = async()=>{
     try{
-    const response = await axios.get('http://localhost:5000/campaigns');
+    const response = await axios.get(`${API_BASE_URL}/campaigns`);
     setCampaigns(response.data)
     }catch(error){
       throw new Error('unable to fetch campaigns', error)
@@ -105,7 +108,7 @@ const ContestantManagement = () => {
       let contestantRes;
       if (editingContestant) {
         // Update existing contestant in DB
-        contestantRes = await axios.put(`http://localhost:5000/contestants/${editingContestant._id}`, newContestant);
+        contestantRes = await axios.put(`${API_BASE_URL}/contestants/${editingContestant._id}`, newContestant);
         showModal(
           'Contestant Updated',
           `${newContestant.name} has been updated successfully.`,
@@ -113,7 +116,7 @@ const ContestantManagement = () => {
         );
       } else {
         // Add new contestant to DB
-        contestantRes = await axios.post('http://localhost:5000/contestants', newContestant);
+        contestantRes = await axios.post(`${API_BASE_URL}/contestants`, newContestant);
         showModal(
           'Contestant Added',
           `${newContestant.name} has been added successfully.`,
@@ -129,7 +132,7 @@ const ContestantManagement = () => {
           // Get the contestant's _id (new or updated)
           const contestantId = (editingContestant ? editingContestant._id : contestantRes.data._id).toString();
           // Fetch the campaign
-          const campaignRes = await axios.get(`http://localhost:5000/campaigns/${campaignId}`);
+          const campaignRes = await axios.get(`${API_BASE_URL}/campaigns/${campaignId}`);
           const campaign = campaignRes.data;
           let participants = Array.isArray(campaign.participants) ? [...campaign.participants] : [];
           participants = participants.map(id => id.toString());
@@ -137,7 +140,7 @@ const ContestantManagement = () => {
             participants.push(contestantId);
             addedToCampaign = true;
           }
-          await axios.put(`http://localhost:5000/campaigns/${campaignId}`, { ...campaign, participants });
+          await axios.put(`${API_BASE_URL}/campaigns/${campaignId}`, { ...campaign, participants });
         } catch (err) {
           console.error('Error updating campaign participants:', err);
         }
@@ -195,7 +198,7 @@ const ContestantManagement = () => {
       true,
       async () => {
         try {
-          await axios.delete(`http://localhost:5000/contestants/${contestant._id}`);
+          await axios.delete(`${API_BASE_URL}/contestants/${contestant._id}`);
           showModal(
             'Contestant Deleted',
             `${contestant.name} has been deleted successfully.`,

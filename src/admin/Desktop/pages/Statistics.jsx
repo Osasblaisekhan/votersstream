@@ -21,6 +21,10 @@ const Statistics = () => {
     regionStats: []
   });
 
+
+  //API CALLS
+
+  const API_BASE_URL = import.meta.env.VITE_API_URL;
   useEffect(() => {
     const fetchStats = async () => {
       setIsSubmitting(true);
@@ -28,10 +32,10 @@ const Statistics = () => {
       setError(null);
       try {
         const [campaignsRes, contestantsRes, usersRes, regionRes] = await Promise.all([
-          axios.get('http://localhost:5000/campaigns'),
-          axios.get('http://localhost:5000/contestants'),
-          axios.get('http://localhost:5000/users'),
-          axios.get('http://localhost:5000/regions')
+          axios.get(`${API_BASE_URL}/campaigns`),
+          axios.get(`${API_BASE_URL}/contestants`),
+          axios.get(`${API_BASE_URL}/users`),
+          axios.get(`${API_BASE_URL}/regions`)
         ]);
         
         const campaigns = campaignsRes.data;

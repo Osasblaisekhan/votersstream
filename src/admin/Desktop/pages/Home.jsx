@@ -18,16 +18,8 @@ const Home = () => {
     topCandidate: null
   });
 
-  console.log('yoo stats', stats.totalUsers)
-  // const fetchUsers = async()=>{
-  //   const response = await axios.get('http://localhost:5000/users');
-  //   setUsers(response.data);
-  // };
-
-  // useEffect(()=>{
-  //   fetchUsers()
-  // },[users]);
-
+  //API CALLS
+  const API_BASE_URL = import.meta.env.VITE_API_URL;
   useEffect(() => {
     const fetchStats = async () => {
       setIsLoading(true);
@@ -36,9 +28,9 @@ const Home = () => {
         // const users = getStoredData('users', []);
         // console.log('yooo votted', users);
         const [campaignsRes, contestantsRes, usersRes] = await Promise.all([
-          axios.get('http://localhost:5000/campaigns'),
-          axios.get('http://localhost:5000/contestants'),
-          axios.get('http://localhost:5000/users')
+          axios.get(`${API_BASE_URL}/campaigns`),
+          axios.get(`${API_BASE_URL}/contestants`),
+          axios.get(`${API_BASE_URL}/users`)
         ]);
         const campaigns = campaignsRes.data;
         const contestants = contestantsRes.data;
@@ -51,12 +43,6 @@ const Home = () => {
         }).length;
 
         const votedUsers = users.filter(u => u.hasVoted).length
-        const myUser = users.find(u=> u.id === "6884f2b20e30322e570e5895");
-        if(myUser){
-          const yo = myUser.name;
-          console.log('yoo name', yo);
-        }
-        console.log('has votted', votedUsers)
         const votingPercentage = users.length > 0 ? ((votedUsers / users.length) * 100).toFixed(1) : 0;
 
         // Calculate total votes and find top candidate

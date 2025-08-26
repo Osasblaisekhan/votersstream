@@ -14,6 +14,9 @@ const Analytics = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  //API CALLS
+  const API_BASE_URL = import.meta.env.VITE_API_URL;
+
   useEffect(() => {
     const fetchData = async () => {
       setIsLoading(true);
@@ -21,10 +24,10 @@ const Analytics = () => {
       try {
         // const users = getStoredData('users', []);
         const [campaignsRes, contestantsRes, regionRes, usersRes] = await Promise.all([
-          axios.get('http://localhost:5000/campaigns'),
-          axios.get('http://localhost:5000/contestants'),
-          axios.get('http://localhost:5000/regions'),
-          axios.get('http://localhost:5000/users')
+          axios.get(`${API_BASE_URL}/campaigns`),
+          axios.get(`${API_BASE_URL}/contestants`),
+          axios.get(`${API_BASE_URL}/regions`),
+          axios.get(`${API_BASE_URL}/users`)
 
         ]);
         setCampaigns(campaignsRes.data);
