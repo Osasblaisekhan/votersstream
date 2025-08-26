@@ -16,7 +16,7 @@ const Header = () => {
                     </div>
       
                    <div>
-                     <h3 className="text-2xl font-bold">Cameroon Voting Portal</h3>
+                     <h3 className="text-2xl font-bold">VoterStream</h3>
                    </div>
                   </div>
       

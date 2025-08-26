@@ -20,7 +20,7 @@ const LandingPage = () => {
               </div>
 
              <div>
-               <h3 className="text-2xl font-bold text-white">Cameroon Voting Portal</h3>
+               <h3 className="text-2xl font-bold text-white">VotersStream</h3>
              </div>
             </div>
 
@@ -54,11 +54,11 @@ const LandingPage = () => {
               <span className="text-white font-bold text-2xl">🇨🇲</span>
             </div>
             <h1 className="text-5xl font-bold text-gray-900 mb-6">
-              Democratic Voting Platform
-              <span className="block text-indigo-600">for Cameroon</span>
+              Live Voting Platform
+              <span className="block text-indigo-600">for Events</span>
             </h1>
             <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
-              Participate in secure, transparent, and accessible democratic elections. 
+              Participate in secure, transparent, and accessible VotersStream. 
               Your voice matters in shaping the future of our nation.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -110,7 +110,7 @@ const LandingPage = () => {
                 <FiGlobe className="text-white" size={32} />
               </div>
               <h3 className="text-xl font-semibold text-gray-900 mb-2">Regional Coverage</h3>
-              <p className="text-gray-600">Comprehensive coverage across all 10 regions of Cameroon</p>
+              <p className="text-gray-600">Comprehensive coverage across all 10 regions of </p>
             </div>
             
             <div className="text-center p-6 rounded-xl bg-orange-50 hover:bg-orange-100 transition-colors">
@@ -193,7 +193,7 @@ const LandingPage = () => {
                 <div className="w-8 h-8 bg-gradient-to-r from-indigo-600 to-purple-600 rounded-lg flex items-center justify-center">
                   <MdHowToVote className="text-white" size={20} />
                 </div>
-                <h3 className="text-xl font-bold">Cameroon Voting Portal</h3>
+                <h3 className="text-xl font-bold"> VotersStream</h3>
               </div>
               <h3 className="text-white">
                 Empowering democratic participation through secure and transparent voting technology.
@@ -214,13 +214,13 @@ const LandingPage = () => {
               <div className="text-white space-y-2">
                 <h3>Email: info@cameroonvoting.cm</h3>
                 <h3>Phone: +237 XXX XXX XXX</h3>
-                <h3>Address: Yaoundé, Cameroon</h3>
+                <h3>Address: Yaoundé, </h3>
               </div>
             </div>
           </div>
           
           <div className="border-t border-gray-800 mt-8 pt-8 text-center text-white">
-            <h3 className='text-white'>&copy; 2025 Cameroon Voting Portal. All rights reserved.</h3>
+            <h3 className='text-white'>&copy; 2025 VotersStream. All rights reserved.</h3>
           </div>
         </div>
       </footer>

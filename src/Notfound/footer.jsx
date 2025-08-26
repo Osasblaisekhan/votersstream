@@ -13,7 +13,7 @@ const Footer = () => {
                       <div className="w-8 h-8 bg-gradient-to-r from-indigo-600 to-purple-600 rounded-lg flex items-center justify-center">
                         <MdHowToVote className="text-white" size={20} />
                       </div>
-                      <h3 className="text-xl font-bold">Cameroon Voting Portal</h3>
+                      <h3 className="text-xl font-bold"> Portal</h3>
                     </div>
                     <p className="text-gray-400">
                       Empowering democratic participation through secure and transparent voting technology.
@@ -40,7 +40,7 @@ const Footer = () => {
                 </div>
                 
                 <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
-                  <p>&copy; 2025 Cameroon Voting Portal. All rights reserved.</p>
+                  <p>&copy; 2025  VotersStream. All rights reserved.</p>
                 </div>
               </div>
             </footer>

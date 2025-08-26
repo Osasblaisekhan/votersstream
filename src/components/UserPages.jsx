@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import './User.css';
-import flag from './assets/flag.png';
+// import flag from './assets/flag.png';
 import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../Auth/AuthContext';
 import { FiLogOut, FiUserPlus } from 'react-icons/fi';
@@ -44,7 +44,7 @@ const UserPages = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center space-x-8">
-              <h3 className="text-xl font-bold">Cameroon Voting Portal</h3>
+              <h3 className="text-xl font-bold">VotersStream</h3>
               
               <nav className="hidden md:flex space-x-4">
                 <button
@@ -103,7 +103,7 @@ const UserPages = () => {
           </div>
 
           {/* Mobile Navigation */}
-          <nav className="md:hidden pb-4">
+          {/* <nav className="md:hidden pb-4">
             <div className="flex space-x-4">
               <button
                 onClick={() => navigate('/user/vote')}
@@ -129,7 +129,34 @@ const UserPages = () => {
                 <span>Results</span>
               </button>
             </div>
-          </nav>
+          </nav> */}
+          {/* Mobile Navigation */}
+<nav className="md:hidden pb-4">
+  <div className="flex space-x-4 bg-white bg-opacity-90 rounded-xl shadow-md px-4 py-3 mt-3 mx-2 justify-center">
+    <button
+      onClick={() => navigate('/user/vote')}
+      className={`flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+        location.pathname === '/user/vote'
+          ? 'bg-indigo-600 text-white shadow'
+          : 'text-indigo-700 hover:bg-indigo-100'
+      }`}
+    >
+      <MdHowToVote size={20} />
+      <span>Vote</span>
+    </button>
+    <button
+      onClick={() => navigate('/user/results')}
+      className={`flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+        location.pathname === '/user/results'
+          ? 'bg-indigo-600 text-white shadow'
+          : 'text-indigo-700 hover:bg-indigo-100'
+      }`}
+    >
+      <AiOutlineBarChart size={20} />
+      <span>Results</span>
+    </button>
+  </div>
+</nav>
         </div>
       </header>
       
@@ -140,12 +167,12 @@ const UserPages = () => {
           <Route path="/" element={
             <div className="text-center">
               <div className="mb-8">
-                <img src={flag} alt="Cameroon Flag" className="w-32 h-auto mx-auto mb-6 rounded-lg shadow-md" />
+                <img src={flag} alt=" Flag" className="w-32 h-auto mx-auto mb-6 rounded-lg shadow-md" />
                 <h1 className="text-4xl font-bold text-gray-900 mb-4">
-                  Welcome to Cameroon Voting Portal
+                  Welcome to VotersStream
                 </h1>
                 <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
-                  Participate in the democratic process. Your voice matters in shaping the future of Cameroon.
+                  Participate in the democratic process. Your voice matters in shaping the future of .
                 </p>
                 <button
                   onClick={handleGetStarted}
@@ -181,7 +208,7 @@ const UserPages = () => {
       
       <footer className="bg-gray-800 py-4 mt-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h3 className='text-white font-bold'>&copy; 2025 Cameroon Voting Portal. All rights reserved.</h3>
+          <h3 className='text-white font-bold'>&copy; 2025  VotersStream. All rights reserved.</h3>
           <h3><UserTime /></h3>
         </div>
       </footer>

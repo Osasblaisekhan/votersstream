@@ -266,6 +266,22 @@ const Results = () => {
   const [selectedCampaign, setSelectedCampaign] = useState('');
   const [loading, setLoading] = useState(false);
 
+  useEffect(() => {
+  if (!selectedCampaign) return;
+  setLoading(true);
+  fetch(`http://localhost:5000/api/results?campaignId=${selectedCampaign}`)
+    .then(res => res.json())
+    .then(data => {
+      setContestants(data.contestants || []);
+      setVotes(data.votes || []);
+      setLoading(false);
+    })
+    .catch(err => {
+      setLoading(false);
+      console.error(err);
+    });
+}, [selectedCampaign]);
+
   // Fetch campaigns on mount
   useEffect(() => {
     fetch('http://localhost:5000/campaigns')
