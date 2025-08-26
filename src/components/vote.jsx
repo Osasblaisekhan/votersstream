@@ -4,8 +4,8 @@ import axios from 'axios';
 import { cameroonRegions } from '../utils/mockData';
 import Modal from './modal';
 import VotingRestrictions from './VotingRestrictions';
-
-const API_URL = 'http://localhost:5000'; // Base URL for API
+  //API CALLS
+  const API_URL = import.meta.env.VITE_API_URL;
 
 const Vote = () => {
   const { user, updateUser } = useAuth();
