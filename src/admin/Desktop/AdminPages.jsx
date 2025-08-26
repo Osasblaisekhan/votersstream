@@ -3,7 +3,7 @@ import { Routes, Route } from 'react-router-dom';
 import './Admin.css'; 
 import Time from './Navbars/Time';
 import Navbar from './Navbars/Navbar';
-import Sidebar from './Navbars/sideBar';
+import Sidebar from './Navbars/Sidebar';
 import User from './Navbars/user';
 import Home from './pages/Home';
 import CampaignManagement from './pages/CampaignManagement';
