@@ -117,9 +117,9 @@ const Signup = () => {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
         <div className="text-center">
-          <div className="w-16 h-16 bg-gradient-to-r from-indigo-600 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4">
-            <span className="text-white text-2xl">🗳️</span>
-          </div>
+            <div className="w-24 h-16 mx-auto mb-6 bg-gradient-to-r from-green-500 to-red-500 rounded-lg flex items-center justify-center">
+              <span className="text-white font-bold text-2xl">VS</span>
+            </div>
           <h2 className="text-3xl font-extrabold text-gray-900">
             Create Voter Account
           </h2>

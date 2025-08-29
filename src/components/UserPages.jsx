@@ -44,7 +44,7 @@ const UserPages = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center space-x-8">
-              <h3 className="text-xl font-bold">Cameroon Voting Portal</h3>
+              <h3 className="text-xl font-bold">Voting Stream</h3>
               
               <nav className="hidden md:flex space-x-4">
                 <button
@@ -73,7 +73,7 @@ const UserPages = () => {
               </nav>
             </div>
 
-            <div>
+            <div className='hidden md:block'>
               <h2>
                 <UserTime />
               </h2>
@@ -140,12 +140,14 @@ const UserPages = () => {
           <Route path="/" element={
             <div className="text-center">
               <div className="mb-8">
-                <img src={flag} alt="Cameroon Flag" className="w-32 h-auto mx-auto mb-6 rounded-lg shadow-md" />
+            <div className="w-24 h-16 mx-auto mb-6 bg-gradient-to-r from-green-500 to-red-500 rounded-lg flex items-center justify-center">
+              <span className="text-white font-bold text-2xl">VS</span>
+            </div>
                 <h1 className="text-4xl font-bold text-gray-900 mb-4">
-                  Welcome to Cameroon Voting Portal
+                  Welcome to Voters Stream
                 </h1>
                 <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
-                  Participate in the democratic process. Your voice matters in shaping the future of Cameroon.
+                 Participate in the democratic process. Your voice matters in shaping the future of our society
                 </p>
                 <button
                   onClick={handleGetStarted}
@@ -181,7 +183,7 @@ const UserPages = () => {
       
       <footer className="bg-gray-800 py-4 mt-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h3 className='text-white font-bold'>&copy; 2025 Cameroon Voting Portal. All rights reserved.</h3>
+          <h3 className='text-white font-bold'>&copy; 2025 Voters Stream. All rights reserved.</h3>
           <h3><UserTime /></h3>
         </div>
       </footer>
