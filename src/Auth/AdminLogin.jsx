@@ -27,7 +27,10 @@ const AdminLogin = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 -mt-60 md:-mt-30">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 -mt-60 md:-mt-30">
+        <div className="w-24 h-16 mx-auto mt-6 bg-gradient-to-r from-green-500 to-red-500 rounded-lg flex items-center justify-center">
+              <span className="text-white font-bold text-2xl">VS</span>
+          </div>
       <div className="max-w-md w-full space-y-8">
         <div>
           <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
